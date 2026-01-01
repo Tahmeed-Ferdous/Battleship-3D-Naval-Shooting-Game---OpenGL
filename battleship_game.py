@@ -27,11 +27,11 @@ missile_speed = 10  #adjust here
 enemy_missiles = []
 enemy_missile_speed = 3  # adjust here
 enemy_fire_cooldown = 0
-enemy_fire_rate = 120  #adjust here
+enemy_fire_rate = 80  #adjust here
 
 # Enemy ships
 enemies = [] 
-enemy_speed = 0.05 #adjust here
+enemy_speed = 0.1 #adjust here
 enemy_size_factor = 1.0
 enemy_size_growing = True
 
@@ -549,15 +549,15 @@ def update_player_movement():
         return
     if p_moving_forward:
         angle_rad=math.radians(p_angle)
-        new_x=p_pos[0]+10*math.cos(angle_rad)
-        new_y=p_pos[1]+10*math.sin(angle_rad)
+        new_x=p_pos[0]+15*math.cos(angle_rad)
+        new_y=p_pos[1]+15*math.sin(angle_rad)
         if abs(new_x)<grid_length-50 and abs(new_y)<grid_length-50:
             p_pos[0]=new_x
             p_pos[1]=new_y
     if p_moving_backward:
         angle_rad=math.radians(p_angle)
-        new_x=p_pos[0]-10* math.cos(angle_rad)
-        new_y=p_pos[1]-10*math.sin(angle_rad)
+        new_x=p_pos[0]-15*math.cos(angle_rad)
+        new_y=p_pos[1]-15*math.sin(angle_rad)
         if abs(new_x)<grid_length-50 and abs(new_y)<grid_length-50:
             p_pos[0]=new_x
             p_pos[1]= new_y
