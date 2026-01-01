@@ -1,6 +1,5 @@
-
-<img width=<img width="1966" height="1562" alt="Screenshot 2026-01-02 041727" src="https://github.com/user-attachments/assets/013d84fc-2c5b-45ac-9140-12486a854c7d" />
-"1974" height="1569" alt="Screenshot 2026-01-02 041531" src="https://github.com/user-attachments/assets/d109b264-8774-40bc-83de-f4611e08efea" />
+<img width="1966" height="1562" alt="Screenshot 2026-01-02 041727" src="https://github.com/user-attachments/assets/013d84fc-2c5b-45ac-9140-12486a854c7d" />
+<img width="1974" height="1569" alt="Screenshot 2026-01-02 041531" src="https://github.com/user-attachments/assets/d109b264-8774-40bc-83de-f4611e08efea" />
 
 Battleship: A 3D Naval Combat Game
 Project Overview
