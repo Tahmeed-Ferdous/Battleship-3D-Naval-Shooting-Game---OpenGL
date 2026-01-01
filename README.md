@@ -1,3 +1,5 @@
+<img width="1974" height="1569" alt="Screenshot 2026-01-02 041531" src="https://github.com/user-attachments/assets/d109b264-8774-40bc-83de-f4611e08efea" />
+
 Battleship: A 3D Naval Combat Game
 Project Overview
 Battleship is a 3D action game where players control a battleship on an ocean grid, shooting missiles at pursuing enemy ships to survive waves and score points. Themed around naval battles, it uses simple geometric models for ships and a checkered blue grid for water, with colored boundaries. Core gameplay involves movement, shooting, and collecting items while avoiding enemy contact.
