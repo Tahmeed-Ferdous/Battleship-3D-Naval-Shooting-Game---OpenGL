@@ -25,13 +25,10 @@ missile_speed = 10  #adjust here
 
 # Enemy missiles
 enemy_missiles = []
-enemy_missile_speed = 3  # adjust here
 enemy_fire_cooldown = 0
-enemy_fire_rate = 80  #adjust here
 
 # Enemy ships
 enemies = [] 
-enemy_speed = 0.1 #adjust here
 enemy_size_factor = 1.0
 enemy_size_growing = True
 
@@ -42,7 +39,6 @@ auto_rotation = 0
 fovY = 80
 grid_length = 600
 boundary_height = 100
-max_missed = 10
 
 water_time = 0
 wave_amplitude = 3
@@ -51,6 +47,44 @@ wave_frequency = 0.05
 HIGH_SCORE_FILE = "highscores.txt"
 TOP_N = 5
 high_scores = []
+
+difficulty = "MEDIUM"
+
+DIFFICULTY_SETTINGS = {
+    "EASY": {
+        "enemy_count": 3,
+        "enemy_speed": 0.06,
+        "enemy_fire_rate": 120,
+        "enemy_missile_speed": 2,
+        "max_missed": 15
+    },
+    "MEDIUM": {
+        "enemy_count": 5,
+        "enemy_speed": 0.1,
+        "enemy_fire_rate": 80,
+        "enemy_missile_speed": 3,
+        "max_missed": 10
+    },
+    "HARD": {
+        "enemy_count": 8,
+        "enemy_speed": 0.18,
+        "enemy_fire_rate": 50,
+        "enemy_missile_speed": 4,
+        "max_missed": 6
+    }
+}
+
+def apply_difficulty():
+    global enemy_speed, enemy_fire_rate, enemy_missile_speed
+    global max_missed
+
+    settings = DIFFICULTY_SETTINGS[difficulty]
+
+    enemy_speed = settings["enemy_speed"]
+    enemy_fire_rate = settings["enemy_fire_rate"]
+    enemy_missile_speed = settings["enemy_missile_speed"]
+    max_missed = settings["max_missed"]
+    enemy_fire_cooldown = 0
 
 def load_high_scores():
     global high_scores
@@ -92,13 +126,17 @@ def draw_text(x, y, text, font=GLUT_BITMAP_HELVETICA_18):
 def initialize_enemies():
     global enemies
     enemies = []
-    for i in range(5):
+
+    count = DIFFICULTY_SETTINGS[difficulty]["enemy_count"]
+
+    for i in range(count):
         while True:
             x = random.uniform(-grid_length + 100, grid_length - 100)
             y = random.uniform(-grid_length + 100, grid_length - 100)
             if abs(x) > 150 or abs(y) > 150:
                 enemies.append([x, y, 0])
                 break
+
 
 def respawn_enemy(index):
     while True:
@@ -531,7 +569,7 @@ def update_cheat_mode():
                     fire_missile()
 
 def keyboardListener(key,x,y):
-    global p_moving_forward, p_moving_backward, cheat_mode, cheat_vision, gameover, p_life, score, missed, missiles, p_alive, p_angle
+    global p_moving_forward, p_moving_backward, cheat_mode, cheat_vision, gameover, p_life, score, missed, missiles, p_alive, p_angle, difficulty
     if key==b'w' and not gameover:
         p_moving_forward = True
     if key==b's' and not gameover:
@@ -562,6 +600,22 @@ def keyboardListener(key,x,y):
         initialize_enemies()
         cheat_mode=False
         cheat_vision=False
+        apply_difficulty()
+    # Difficulty selection (only before game over)
+    if key == b'1' and not gameover:
+        difficulty = "EASY"
+        apply_difficulty()
+        initialize_enemies()
+
+    if key == b'2'and not gameover:
+        difficulty = "MEDIUM"
+        apply_difficulty()
+        initialize_enemies()
+
+    if key == b'3' and not gameover:
+        difficulty = "HARD"
+        apply_difficulty()
+        initialize_enemies()
 
 def keyboardUpListener(key, x, y):
     global p_moving_forward, p_moving_backward
@@ -673,6 +727,10 @@ def showScreen():
     draw_text(10,770,f"Life Remaining: {p_life}")
     draw_text(10,740,f"Ships Destroyed: {score}")
     draw_text(10,710,f"Missiles Missed: {missed}")
+    if high_scores:
+        draw_text(10, 680, f"High Score: {high_scores[0]}")
+    draw_text(10, 650, f"Difficulty: {difficulty}")
+
     if gameover:
         draw_text(350,400,"BATTLESHIP SUNK! Press R to Restart",GLUT_BITMAP_TIMES_ROMAN_24)
         draw_text(380, 360, "HIGH SCORES")
@@ -692,8 +750,9 @@ def main():
     wind = glutCreateWindow(b"Battleship - 3D Naval Combat")
 
     glEnable(GL_DEPTH_TEST)
-    
+    apply_difficulty()
     initialize_enemies()
+
     glutDisplayFunc(showScreen)
     glutKeyboardFunc(keyboardListener)
     glutKeyboardUpFunc(keyboardUpListener)
