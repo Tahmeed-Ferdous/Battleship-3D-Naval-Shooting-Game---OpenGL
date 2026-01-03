@@ -48,6 +48,30 @@ water_time = 0
 wave_amplitude = 3
 wave_frequency = 0.05
 
+HIGH_SCORE_FILE = "highscores.txt"
+TOP_N = 5
+high_scores = []
+
+def load_high_scores():
+    global high_scores
+    try:
+        with open(HIGH_SCORE_FILE, "r") as f:
+            high_scores = [int(line.strip()) for line in f.readlines()]
+    except:
+        high_scores = []
+
+def save_high_scores():
+    with open(HIGH_SCORE_FILE, "w") as f:
+        for s in high_scores[:TOP_N]:
+            f.write(str(s) + "\n")
+
+def update_high_scores(new_score):
+    global high_scores
+    high_scores.append(new_score)
+    high_scores = sorted(high_scores, reverse=True)[:TOP_N]
+    save_high_scores()
+
+
 def draw_text(x, y, text, font=GLUT_BITMAP_HELVETICA_18):
     glColor3f(1, 1, 1)
     glMatrixMode(GL_PROJECTION)
@@ -380,6 +404,7 @@ def update_missiles():
                 missed += 1
                 if missed >= max_missed:
                     gameover = True
+                    update_high_scores(score)
             continue
         for j, enemy in enumerate(enemies):
             distance = math.sqrt((missile[0] - enemy[0])**2 + (missile[1] - enemy[1])**2)
@@ -438,6 +463,7 @@ def update_enemies():
             p_life -= 1
             if p_life <= 0:
                 gameover = True
+                update_high_scores(score)
             respawn_enemy(enemies.index(enemy))
     if enemy_fire_cooldown >= enemy_fire_rate:
         enemy_fire_cooldown = 0
@@ -459,6 +485,7 @@ def update_enemy_missiles():
             p_life -= 1
             if p_life <= 0:
                 gameover = True
+                update_high_scores(score)
     for i in sorted(missiles_to_remove, reverse=True):
         if i < len(enemy_missiles):
             enemy_missiles.pop(i)
@@ -648,6 +675,11 @@ def showScreen():
     draw_text(10,710,f"Missiles Missed: {missed}")
     if gameover:
         draw_text(350,400,"BATTLESHIP SUNK! Press R to Restart",GLUT_BITMAP_TIMES_ROMAN_24)
+        draw_text(380, 360, "HIGH SCORES")
+        y = 330
+        for i, s in enumerate(high_scores):
+            draw_text(380, y, f"{i+1}. {s}")
+            y -= 25
     if cheat_mode:
         draw_text(10,680,"AUTO-AIM ENGAGED")
     glutSwapBuffers()
@@ -668,7 +700,7 @@ def main():
     glutSpecialFunc(specialKeyListener)
     glutMouseFunc(mouseListener)
     glutIdleFunc(idle)
-    
+    load_high_scores()
     glutMainLoop()
 
 if __name__ == "__main__":
