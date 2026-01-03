@@ -83,6 +83,76 @@ drones = []
 drone_speed = 8
 drone_radius = 25  
 MAX_DRONES = 1
+wind_active = False
+wind_radius = 0
+WIND_SPREAD_ANGLE = 60 
+WIND_PUSH_STRENGTH = 10
+
+WIND_MAX_RADIUS = 400  
+WIND_EXPAND_SPEED = 3.0  
+
+def draw_wind():
+    global wind_radius, wind_active
+
+    if not wind_active:
+        return
+
+    glPushMatrix()
+    glTranslatef(p_pos[0], p_pos[1], p_pos[2] + 15)
+    glRotatef(p_angle, 0, 0, 1)
+
+    segments = 120
+    arc_angle = WIND_SPREAD_ANGLE
+    trail_count = 60  
+    ease_factor = 1 - (wind_radius / WIND_MAX_RADIUS)
+    current_speed = WIND_EXPAND_SPEED * (0.5 + 0.5 * ease_factor)
+    for layer in range(3):
+        layer_radius = wind_radius - layer * 4
+        layer_opacity = max(0.0, 0.5 * (1 - layer / 3) * (1 - wind_radius / WIND_MAX_RADIUS))
+        glLineWidth(1.5)
+        glBegin(GL_LINE_STRIP)
+        for i in range(segments + 1):
+            angle = math.radians(-arc_angle / 2 + i * (arc_angle / segments))
+            twist = 2 * math.sin(i * 8 + water_time * 0.3 + layer)
+            x = (layer_radius + twist) * math.cos(angle)
+            y = (layer_radius + twist) * math.sin(angle)
+            z = 4 * math.sin(i / segments * math.pi + water_time * 0.2) + layer * 1.2
+            glColor4f(0.75 + 0.05 * layer, 0.8 + 0.05 * layer, 1.0, layer_opacity)
+            glVertex3f(x, y, z)
+        glEnd()
+    for _ in range(trail_count):
+        angle_offset = math.radians(random.uniform(-arc_angle / 2, arc_angle / 2))
+        radius_offset = random.uniform(max(0, wind_radius - 80), wind_radius)
+        z_offset = random.uniform(0, 8)
+        length = random.uniform(30, 60)
+        glColor4f(0.8, 0.85, 1.0, 0.2)
+        glBegin(GL_LINES)
+        glVertex3f(radius_offset * math.cos(angle_offset),
+                   radius_offset * math.sin(angle_offset),
+                   z_offset)
+        glVertex3f((radius_offset - length) * math.cos(angle_offset),
+                   (radius_offset - length) * math.sin(angle_offset),
+                   z_offset + random.uniform(0, 5))
+        glEnd()
+    for layer in range(2):
+        offset_radius = wind_radius - 8 - layer * 4
+        glLineWidth(1.0)
+        glBegin(GL_LINE_STRIP)
+        for i in range(segments + 1):
+            angle = math.radians(-arc_angle / 2 + i * (arc_angle / segments))
+            x = (offset_radius + 2 * math.sin(i * 6 + water_time * 0.25)) * math.cos(angle)
+            y = (offset_radius + 2 * math.sin(i * 6 + water_time * 0.25)) * math.sin(angle)
+            z = 1.5 * layer + 2 * math.sin(i / segments * math.pi + water_time * 0.15)
+            opacity = max(0.0, 0.25 * (1 - wind_radius / WIND_MAX_RADIUS))
+            glColor4f(0.7, 0.75, 1.0, opacity)
+            glVertex3f(x, y, z)
+        glEnd()
+
+    glPopMatrix()
+    wind_radius += current_speed
+    if wind_radius > WIND_MAX_RADIUS:
+        wind_active = False
+        wind_radius = 0
 
 def spawn_drone():
     global drones
@@ -660,7 +730,26 @@ def update_missiles():
 
 def update_enemies():
     global p_life, gameover, enemy_size_factor, enemy_size_growing, enemy_fire_cooldown
-    
+    global wind_active, wind_radius
+    if wind_active:
+        wind_radius += 10 
+        for enemy in enemies:
+            dx = enemy[0] - p_pos[0]
+            dy = enemy[1] - p_pos[1]
+            distance = math.sqrt(dx**2 + dy**2)
+            if distance < wind_radius:
+                angle_to_enemy = math.degrees(math.atan2(dy, dx))
+                angle_diff = (angle_to_enemy - p_angle + 360) % 360
+                if angle_diff > 180:
+                    angle_diff -= 360
+                if abs(angle_diff) < WIND_SPREAD_ANGLE/2:
+                    angle_rad = math.radians(p_angle)
+                    enemy[0] += math.cos(angle_rad) * WIND_PUSH_STRENGTH
+                    enemy[1] += math.sin(angle_rad) * WIND_PUSH_STRENGTH
+
+        if wind_radius > WIND_MAX_RADIUS:
+            wind_active = False  
+
     if gameover:
         return
     if enemy_size_growing:
@@ -773,6 +862,8 @@ def update_cheat_mode():
 def keyboardListener(key,x,y):
     global p_moving_forward, p_moving_backward, cheat_mode, cheat_vision, gameover, p_life, score, missed, missiles, p_alive, p_angle
     global difficulty, max_mines, current_mines 
+    global wind_active, wind_radius 
+
     if key==b'w' and not gameover:
         p_moving_forward = True
     if key==b's' and not gameover:
@@ -808,7 +899,7 @@ def keyboardListener(key,x,y):
         drones.clear()
         mines.clear()
         apply_difficulty()
-    # Difficulty selection (only before game over)
+
     if key == b'1' and not gameover:
         difficulty = "EASY"
         apply_difficulty()
@@ -829,6 +920,11 @@ def keyboardListener(key,x,y):
 
     if key == b'n' and not gameover:
         spawn_drone()
+
+    if key == b'b' and not gameover:
+        if not wind_active:
+            wind_active = True
+            wind_radius = 0  
 
 def keyboardUpListener(key, x, y):
     global p_moving_forward, p_moving_backward
@@ -929,7 +1025,8 @@ def showScreen():
     draw_ocean_grid()
     draw_boundaries()
     draw_battleship()
-    
+    draw_wind()
+
     for enemy in enemies:
         draw_enemy_ship(enemy[0],enemy[1],enemy[2])
 
@@ -950,19 +1047,17 @@ def showScreen():
     draw_text(10,710,f"Missiles Missed: {missed}")
     draw_text(10,680,f"Mines Remaining: {max_mines - current_mines}")
     draw_text(10,650,f"Drones Remaining: {MAX_DRONES - len(drones)}")
-    if high_scores:
-        draw_text(10, 620, f"High Score: {high_scores[0]}")
-    draw_text(10, 590, f"Difficulty: {difficulty}")  # shift this down to avoid overlap
+    draw_text(10, 620, f"Difficulty: {difficulty}")  
 
     if gameover:
-        draw_text(350,400,"BATTLESHIP SUNK! Press R to Restart",GLUT_BITMAP_TIMES_ROMAN_24)
+        draw_text(350,400,"BATTLESHIP SUNK! Press R to Restart", GLUT_BITMAP_TIMES_ROMAN_24)
         draw_text(350, 360, "HIGH SCORES")
         y = 330
         for i, s in enumerate(high_scores):
             draw_text(350, y, f"{i+1}. {s}")
             y -= 25
     if cheat_mode:
-        draw_text(10,560,"AUTO-AIM ENGAGED")
+        draw_text(10,590,"AUTO-AIM ENGAGED")
     glutSwapBuffers()
 
 def main():
