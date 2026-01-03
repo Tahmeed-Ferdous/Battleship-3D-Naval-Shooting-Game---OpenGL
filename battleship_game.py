@@ -74,12 +74,96 @@ DIFFICULTY_SETTINGS = {
     }
 }
 
+mines = []  
+mine_radius = 150  
+
+def drop_mine():
+    if not gameover:
+        angle_rad = math.radians(p_angle)
+        mine_x = p_pos[0] + 50 * math.cos(angle_rad)
+        mine_y = p_pos[1] + 50 * math.sin(angle_rad)
+        mine_z = p_pos[2]
+        mines.append([mine_x, mine_y, mine_z])
+
+def update_mines():
+    global mines, score
+    mines_to_remove = []
+
+    for i, mine in enumerate(mines):
+        mx, my, mz = mine
+        for j, enemy in enumerate(enemies):
+            ex, ey, ez = enemy
+            distance = math.sqrt((mx - ex)**2 + (my - ey)**2)
+            if distance < mine_radius:
+                score += 1
+                respawn_enemy(j)
+                mines_to_remove.append(i)  
+                break
+
+    for i in sorted(mines_to_remove, reverse=True):
+        if i < len(mines):
+            mines.pop(i)
+
+def draw_mine(x, y, z):
+    glPushMatrix()
+
+    hover = 10 + math.sin(water_time * 0.1) * 3
+    glTranslatef(x, y, z + hover)
+    glRotatef(water_time * 2 % 360, 0, 0, 1)
+
+    glow_factor = 0.05 * math.sin(water_time * 0.3)
+    glColor3f(0.1 + glow_factor, 0.1 + glow_factor, 0.1 + glow_factor)
+    glutSolidSphere(15, 30, 30)
+
+    glPushMatrix()
+    glColor3f(0.25, 0.25, 0.25)
+    glRotatef(90, 1, 0, 0)
+    gluCylinder(gluNewQuadric(), 10.5, 10.5, 2, 20, 1)
+    glPopMatrix()
+
+    spike_length = 12
+    spike_tip_length = 4
+
+    glColor3f(0.1, 0.1, 0.1)
+    quad = gluNewQuadric()
+
+    glPushMatrix()
+    glTranslatef(0, 0, 15)
+    glRotatef(-90, 1, 0, 0)
+    gluCylinder(quad, 2, 0, spike_length, 8, 2)  
+    glTranslatef(0, 0, spike_length)
+    glColor3f(1.0, 0.2 + 0.3*math.sin(water_time*0.2), 0.2)
+    gluCylinder(quad, 1.5, 0, spike_tip_length, 8, 2)
+    glPopMatrix()
+
+    glPushMatrix()
+    glTranslatef(0, 0, -15)
+    glRotatef(90, 1, 0, 0)
+    gluCylinder(quad, 2, 0, spike_length, 8, 2)
+    glTranslatef(0, 0, spike_length)
+    glColor3f(1.0, 0.2 + 0.3*math.sin(water_time*0.2), 0.2)
+    gluCylinder(quad, 1.5, 0, spike_tip_length, 8, 2)
+    glPopMatrix()
+
+    for angle in [0, 90, 180, 270]:
+        glPushMatrix()
+        glRotatef(angle + water_time, 0, 0, 1)
+        glTranslatef(15, 0, 0)
+        glRotatef(90, 0, 1, 0)
+        glColor3f(0.1, 0.1, 0.1)
+        gluCylinder(quad, 2, 0, spike_length, 8, 2)
+        glTranslatef(0, 0, spike_length)
+        glColor3f(1.0, 0.2 + 0.3*math.sin(water_time*0.2), 0.2)
+        gluCylinder(quad, 1.5, 0, spike_tip_length, 8, 2)
+        glPopMatrix()
+
+    glPopMatrix()
+
+
 def apply_difficulty():
     global enemy_speed, enemy_fire_rate, enemy_missile_speed
     global max_missed
-
     settings = DIFFICULTY_SETTINGS[difficulty]
-
     enemy_speed = settings["enemy_speed"]
     enemy_fire_rate = settings["enemy_fire_rate"]
     enemy_missile_speed = settings["enemy_missile_speed"]
@@ -600,6 +684,7 @@ def keyboardListener(key,x,y):
         initialize_enemies()
         cheat_mode=False
         cheat_vision=False
+        mines.clear()
         apply_difficulty()
     # Difficulty selection (only before game over)
     if key == b'1' and not gameover:
@@ -616,6 +701,9 @@ def keyboardListener(key,x,y):
         difficulty = "HARD"
         apply_difficulty()
         initialize_enemies()
+
+    if key == b'm' and not gameover:
+        drop_mine()
 
 def keyboardUpListener(key, x, y):
     global p_moving_forward, p_moving_backward
@@ -704,6 +792,7 @@ def idle():
     update_enemy_missiles()
     update_enemies()
     update_cheat_mode()
+    update_mines()
     glutPostRedisplay()
 
 def showScreen():
@@ -724,6 +813,9 @@ def showScreen():
     for missile in enemy_missiles:
         draw_enemy_missile(missile[0],missile[1],missile[2])
 
+    for mine in mines:
+        draw_mine(mine[0], mine[1], mine[2])
+        
     draw_text(10,770,f"Life Remaining: {p_life}")
     draw_text(10,740,f"Ships Destroyed: {score}")
     draw_text(10,710,f"Missiles Missed: {missed}")
