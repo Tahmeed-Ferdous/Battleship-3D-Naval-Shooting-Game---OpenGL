@@ -76,17 +76,21 @@ DIFFICULTY_SETTINGS = {
 
 mines = []  
 mine_radius = 150  
+max_mines = 5
+current_mines = 0
 
 def drop_mine():
-    if not gameover:
+    global mines, current_mines  
+    if not gameover and current_mines < max_mines:
         angle_rad = math.radians(p_angle)
         mine_x = p_pos[0] + 50 * math.cos(angle_rad)
         mine_y = p_pos[1] + 50 * math.sin(angle_rad)
         mine_z = p_pos[2]
         mines.append([mine_x, mine_y, mine_z])
+        current_mines += 1 
 
 def update_mines():
-    global mines, score
+    global mines, score, current_mines  
     mines_to_remove = []
 
     for i, mine in enumerate(mines):
@@ -103,6 +107,8 @@ def update_mines():
     for i in sorted(mines_to_remove, reverse=True):
         if i < len(mines):
             mines.pop(i)
+            current_mines -= 1 
+
 
 def draw_mine(x, y, z):
     glPushMatrix()
@@ -653,7 +659,8 @@ def update_cheat_mode():
                     fire_missile()
 
 def keyboardListener(key,x,y):
-    global p_moving_forward, p_moving_backward, cheat_mode, cheat_vision, gameover, p_life, score, missed, missiles, p_alive, p_angle, difficulty
+    global p_moving_forward, p_moving_backward, cheat_mode, cheat_vision, gameover, p_life, score, missed, missiles, p_alive, p_angle
+    global difficulty, max_mines, current_mines 
     if key==b'w' and not gameover:
         p_moving_forward = True
     if key==b's' and not gameover:
@@ -684,6 +691,8 @@ def keyboardListener(key,x,y):
         initialize_enemies()
         cheat_mode=False
         cheat_vision=False
+        max_mines = 5
+        current_mines = 0
         mines.clear()
         apply_difficulty()
     # Difficulty selection (only before game over)
@@ -819,9 +828,10 @@ def showScreen():
     draw_text(10,770,f"Life Remaining: {p_life}")
     draw_text(10,740,f"Ships Destroyed: {score}")
     draw_text(10,710,f"Missiles Missed: {missed}")
+    draw_text(10,680,f"Mines Remaining: {max_mines - current_mines}")
     if high_scores:
-        draw_text(10, 680, f"High Score: {high_scores[0]}")
-    draw_text(10, 650, f"Difficulty: {difficulty}")
+        draw_text(10, 650, f"High Score: {high_scores[0]}")
+    draw_text(10, 620, f"Difficulty: {difficulty}")
 
     if gameover:
         draw_text(350,400,"BATTLESHIP SUNK! Press R to Restart",GLUT_BITMAP_TIMES_ROMAN_24)
