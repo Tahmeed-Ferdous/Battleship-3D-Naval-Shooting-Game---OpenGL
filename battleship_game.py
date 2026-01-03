@@ -79,6 +79,118 @@ mine_radius = 150
 max_mines = 5
 current_mines = 0
 
+drones = [] 
+drone_speed = 8
+drone_radius = 25  
+MAX_DRONES = 1
+
+def spawn_drone():
+    global drones
+    if gameover:
+        return
+    angle_rad = math.radians(p_angle)
+    drone_x = p_pos[0] + 50 * math.cos(angle_rad)  
+    drone_y = p_pos[1] + 50 * math.sin(angle_rad)
+    drone_z = p_pos[2] + 10  
+    if len(drones) < MAX_DRONES:
+        drones.append([drone_x, drone_y, drone_z])
+
+def update_drones():
+    global drones, score
+    drones_to_remove = []
+    for i, drone in enumerate(drones):
+        if not enemies:
+            continue
+        nearest_enemy = min(enemies, key=lambda e: math.sqrt((e[0]-drone[0])**2 + (e[1]-drone[1])**2))
+        dx = nearest_enemy[0] - drone[0]
+        dy = nearest_enemy[1] - drone[1]
+        distance = math.sqrt(dx**2 + dy**2)
+        if distance > 0:
+            drone[0] += (dx / distance) * drone_speed
+            drone[1] += (dy / distance) * drone_speed
+        if distance < drone_radius:
+            score += 1
+            respawn_enemy(enemies.index(nearest_enemy))
+            drones_to_remove.append(i)
+    for i in sorted(drones_to_remove, reverse=True):
+        drones.pop(i)
+
+def draw_drone(x, y, z, rotation_angle=0, time=0):
+    glPushMatrix()
+    glTranslatef(x, y, z)
+    quad = gluNewQuadric()
+    glPushMatrix()
+    glow = 0.05 * math.sin(time * 0.3)
+    glColor3f(0.9 + glow, 0.85 + glow, 0.2) 
+    glutSolidSphere(10, 20, 20)
+    glPopMatrix()
+    glPushMatrix()
+    glTranslatef(0, 0, 10)
+    glColor3f(0.75, 0.75, 0.75)  
+    glRotatef(-90, 1, 0, 0)
+    gluCylinder(quad, 5, 0, 10, 12, 1)
+    glPopMatrix()
+    glPushMatrix()
+    glTranslatef(0, -4, 6)
+    glow = 0.4 + 0.4 * math.sin(time * 0.4)
+    glColor3f(0.2, 0.8 + glow*0.2, 0.9)
+    glutSolidSphere(3, 10, 10)
+    glTranslatef(0, 0, -2)
+    glColor3f(0.15, 0.15, 0.15)
+    gluCylinder(quad, 0.5, 0.5, 4, 8, 1)
+    glPopMatrix()
+    for angle in [20, -20]:
+        glPushMatrix()
+        glTranslatef(0, 0, -12)
+        glRotatef(angle, 1, 0, 0)
+        glColor3f(0.7, 0.7, 0.7)
+        glScalef(0.5, 0.5, 1.5)
+        glutSolidCube(8)
+        glPopMatrix()
+    for angle in [45, -45]:
+        glPushMatrix()
+        glRotatef(angle, 0, 0, 1)
+        glTranslatef(7, 0, -3)
+        glColor3f(0.6, 0.6, 0.6)
+        glScalef(0.3, 1.5, 0.5)
+        glutSolidCube(6)
+        glPopMatrix()
+    for angle in [0, 90, 180, 270]:
+        glPushMatrix()
+        glRotatef(angle, 0, 0, 1)
+        glTranslatef(12, 0, 0)
+        glColor3f(0.25, 0.25, 0.25)
+        gluCylinder(quad, 1, 1, 12, 8, 1)
+
+        glTranslatef(12, 0, 0)
+        glRotatef(rotation_angle, 1, 0, 0)
+        glColor3f(0.1, 0.1, 0.1)
+        glutSolidSphere(1.5, 10, 10)
+        for blade_angle in [0, 45, 90, 135]:
+            glPushMatrix()
+            glRotatef(blade_angle, 0, 0, 1)
+            glTranslatef(2, 0, 0)
+            glScalef(1, 0.1, 0.1)
+            glColor3f(0.15, 0.15, 0.15)
+            glutSolidCube(4)
+            glPopMatrix()
+        glPushMatrix()
+        glTranslatef(2, 0, 0)
+        if angle % 180 == 0:
+            glColor3f(1.0, 0.2, 0.2)  
+        else:
+            glColor3f(0.2, 1.0, 0.2)
+        glutSolidSphere(1.2, 8, 8)
+        glPopMatrix()
+        glPopMatrix()
+    for side in [-1, 1]:
+        glPushMatrix()
+        glTranslatef(side * 4, -2, -10)
+        glColor3f(0.2, 0.2, 0.2)
+        gluCylinder(quad, 0.8, 0.8, 5, 8, 1)
+        glPopMatrix()
+    glPopMatrix()
+
 def drop_mine():
     global mines, current_mines  
     if not gameover and current_mines < max_mines:
@@ -693,6 +805,7 @@ def keyboardListener(key,x,y):
         cheat_vision=False
         max_mines = 5
         current_mines = 0
+        drones.clear()
         mines.clear()
         apply_difficulty()
     # Difficulty selection (only before game over)
@@ -713,6 +826,9 @@ def keyboardListener(key,x,y):
 
     if key == b'm' and not gameover:
         drop_mine()
+
+    if key == b'n' and not gameover:
+        spawn_drone()
 
 def keyboardUpListener(key, x, y):
     global p_moving_forward, p_moving_backward
@@ -802,6 +918,7 @@ def idle():
     update_enemies()
     update_cheat_mode()
     update_mines()
+    update_drones()
     glutPostRedisplay()
 
 def showScreen():
@@ -824,24 +941,28 @@ def showScreen():
 
     for mine in mines:
         draw_mine(mine[0], mine[1], mine[2])
-        
+
+    for drone in drones:
+        draw_drone(drone[0], drone[1], drone[2])
+   
     draw_text(10,770,f"Life Remaining: {p_life}")
     draw_text(10,740,f"Ships Destroyed: {score}")
     draw_text(10,710,f"Missiles Missed: {missed}")
     draw_text(10,680,f"Mines Remaining: {max_mines - current_mines}")
+    draw_text(10,650,f"Drones Remaining: {MAX_DRONES - len(drones)}")
     if high_scores:
-        draw_text(10, 650, f"High Score: {high_scores[0]}")
-    draw_text(10, 620, f"Difficulty: {difficulty}")
+        draw_text(10, 620, f"High Score: {high_scores[0]}")
+    draw_text(10, 590, f"Difficulty: {difficulty}")  # shift this down to avoid overlap
 
     if gameover:
         draw_text(350,400,"BATTLESHIP SUNK! Press R to Restart",GLUT_BITMAP_TIMES_ROMAN_24)
-        draw_text(380, 360, "HIGH SCORES")
+        draw_text(350, 360, "HIGH SCORES")
         y = 330
         for i, s in enumerate(high_scores):
-            draw_text(380, y, f"{i+1}. {s}")
+            draw_text(350, y, f"{i+1}. {s}")
             y -= 25
     if cheat_mode:
-        draw_text(10,680,"AUTO-AIM ENGAGED")
+        draw_text(10,560,"AUTO-AIM ENGAGED")
     glutSwapBuffers()
 
 def main():
