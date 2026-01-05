@@ -59,7 +59,6 @@ DIFFICULTY_SETTINGS={
         "max_missed":6
     }
 }
-
 mines=[]  
 mine_radius=150  
 max_mines=5
@@ -335,7 +334,6 @@ def draw_mine(x,y,z):
         gluCylinder(quad,1.5,0,spike_tip_length,8,2)
         glPopMatrix()
     glPopMatrix()
-# SHAKIB
 def spawn_bonus_pt():
     if len(bonus_pts)<max_bonus:
         x=random.uniform(-grid_length+150,grid_length-150)
@@ -459,7 +457,6 @@ def update_inv_pts():
         if inv_timer<=0:
             inv_active=False
             inv_timer=0
-# SHAKIB
 def check_oheat():
     global fire_times,oheat,oheat_timer
     if len(fire_times)>=5:
@@ -470,13 +467,11 @@ def check_oheat():
             fire_times.clear()
 def update_oheat():
     global oheat,oheat_timer,fire_times
-    # SHAKIB
     if cheat_mode:
         oheat=False
         oheat_timer=0
         fire_times=[]
         return
-    # SHAKIB
     if oheat:
         oheat_timer-=1
         if oheat_timer<=0:
@@ -537,7 +532,7 @@ def update_fuel():
         fuel+=fuel_regen
         if fuel>fuel_max:
             fuel=fuel_max
-# SHAKIB
+
 def apply_difficulty():
     global enemy_speed,enemy_fire_rate,enemy_missile_speed
     global max_missed
@@ -599,10 +594,8 @@ def respawn_enemy(index):
             enemies[index]=[x,y,0]
             break
 def draw_battleship():
-    # SHAKIB
     if inv_active and (water_time%10<5):
         return
-    # SHAKIB
     glPushMatrix()
     glTranslatef(p_pos[0],p_pos[1],p_pos[2])
     glRotatef(p_angle,0,0,1)
@@ -726,7 +719,6 @@ def draw_enemy_ship(x,y,z):
     glColor3f(0.3,0.1,0.1)
     gluCylinder(gluNewQuadric(),8*en_size_factor,8*en_size_factor,10*en_size_factor,10,1)
     glPopMatrix()
-    
     glPushMatrix()
     glTranslatef(-10*en_size_factor,0,28)
     glColor3f(0.2,0.2,0.2)
@@ -788,7 +780,6 @@ def draw_ocean_grid():
 def draw_boundaries():
     far_distance=grid_length*5
     sky_height=boundary_height*4
-    # Front
     glBegin(GL_QUADS)
     glColor3f(0.02,0.02,0.15)
     glVertex3f(-far_distance,far_distance,0)
@@ -797,7 +788,6 @@ def draw_boundaries():
     glVertex3f(far_distance,far_distance,sky_height)
     glVertex3f(-far_distance,far_distance,sky_height)
     glEnd()
-    # Right
     glBegin(GL_QUADS)
     glColor3f(0.02,0.02,0.15)
     glVertex3f(far_distance,-far_distance,0)
@@ -806,7 +796,6 @@ def draw_boundaries():
     glVertex3f(far_distance,far_distance,sky_height)
     glVertex3f(far_distance,-far_distance,sky_height)
     glEnd()
-    # Back
     glBegin(GL_QUADS)
     glColor3f(0.02,0.02,0.15)
     glVertex3f(-far_distance,-far_distance,0)
@@ -815,7 +804,6 @@ def draw_boundaries():
     glVertex3f(far_distance,-far_distance,sky_height)
     glVertex3f(-far_distance,-far_distance,sky_height)
     glEnd()
-    # Left
     glBegin(GL_QUADS)
     glColor3f(0.02,0.02,0.15)
     glVertex3f(-far_distance,-far_distance,0)
@@ -837,21 +825,18 @@ def draw_boundaries():
         glVertex3f(-far_distance+100,star_y,star_z)
     glEnd()
 def fire_missile():
-    # SHAKIB
     if oheat and not cheat_mode:
         return
-    # SHAKIB
     if not gameover:
         angle_rad=math.radians(p_angle)
         missile_x=p_pos[0]+60*math.cos(angle_rad)
         missile_y=p_pos[1]+60*math.sin(angle_rad)
         missile_z=p_pos[2]
         missiles.append([missile_x,missile_y,missile_z,p_angle])
-        # SHAKIB
         if not cheat_mode:
             fire_times.append(water_time)
             check_oheat()
-        # SHAKIB
+        
 def update_missiles():
     global missiles,missed,score,gameover
     missiles_to_remove=[]
@@ -909,114 +894,98 @@ def update_enemies():
             en_size_growing=True
     enemy_fire_cooldown+=1
     for enemy in enemies:
-        dx = p_pos[0] - enemy[0]
-        dy = p_pos[1] - enemy[1]
-        distance = math.sqrt(dx**2 + dy**2)
-        
+        dx=p_pos[0]-enemy[0]
+        dy=p_pos[1]-enemy[1]
+        distance = math.sqrt(dx**2+dy**2)
         if distance > 0:
-            enemy[0] += (dx / distance) * enemy_speed
-            enemy[1] += (dy / distance) * enemy_speed
+            enemy[0]+=(dx/distance)*enemy_speed
+            enemy[1]+=(dy/distance)*enemy_speed
     
         if enemy_fire_cooldown >= enemy_fire_rate and distance < 400:
-            if dx == 0:
+            if dx==0:
                 if dy > 0:
-                    fire_angle = 90
+                    fire_angle=90
                 else:
-                    fire_angle = 270
+                    fire_angle=270
             else:
-                angle_rad = math.atan(dy / dx)
-                fire_angle = math.degrees(angle_rad)
+                angle_rad=math.atan(dy / dx)
+                fire_angle=math.degrees(angle_rad)
                 if dx < 0:
-                    fire_angle += 180
-            angle_rad = math.radians(fire_angle)
-            missile_x = enemy[0] + 40 * math.cos(angle_rad)
-            missile_y = enemy[1] + 40 * math.sin(angle_rad)
-            missile_z = enemy[2]
-            enemy_missiles.append([missile_x, missile_y, missile_z, fire_angle])
+                    fire_angle+=180
+            angle_rad=math.radians(fire_angle)
+            missile_x=enemy[0]+40*math.cos(angle_rad)
+            missile_y=enemy[1]+40*math.sin(angle_rad)
+            missile_z=enemy[2]
+            enemy_missiles.append([missile_x,missile_y,missile_z,fire_angle])
         if distance < 50:
-            # SHAKIB
             if not inv_active:
-                p_life -= 1
-                if p_life <= 0:
-                    gameover = True
+                p_life-=1
+                if p_life<=0:
+                    gameover=True
                     update_high_scores(score)
-            # SHAKIB
+            
             respawn_enemy(enemies.index(enemy))
-    if enemy_fire_cooldown >= enemy_fire_rate:
-        enemy_fire_cooldown = 0
+    if enemy_fire_cooldown>=enemy_fire_rate:
+        enemy_fire_cooldown=0
 
 def update_enemy_missiles():
-    global enemy_missiles, p_life, gameover
-    missiles_to_remove = []
-    
+    global enemy_missiles,p_life,gameover
+    missiles_to_remove=[]
     for i, missile in enumerate(enemy_missiles):
-        angle_rad = math.radians(missile[3])
-        missile[0] += enemy_missile_speed * math.cos(angle_rad)
-        missile[1] += enemy_missile_speed * math.sin(angle_rad)
+        angle_rad=math.radians(missile[3])
+        missile[0]+=enemy_missile_speed*math.cos(angle_rad)
+        missile[1]+=enemy_missile_speed*math.sin(angle_rad)
         if (abs(missile[0]) > grid_length or abs(missile[1]) > grid_length):
             missiles_to_remove.append(i)
             continue
-        distance = math.sqrt((missile[0] - p_pos[0])**2 + (missile[1] - p_pos[1])**2)
+        distance=math.sqrt((missile[0]-p_pos[0])**2+(missile[1]-p_pos[1])**2)
         if distance < 40:
             missiles_to_remove.append(i)
-            # SHAKIB
             if not inv_active:
-                p_life -= 1
-                if p_life <= 0:
-                    gameover = True
+                p_life-=1
+                if p_life<=0:
+                    gameover=True
                     update_high_scores(score)
-            # SHAKIB
-    for i in sorted(missiles_to_remove, reverse=True):
+            
+    for i in sorted(missiles_to_remove,reverse=True):
         if i < len(enemy_missiles):
             enemy_missiles.pop(i)
 
 def update_cheat_mode():
-    global p_angle, auto_rotation
-    
+    global p_angle,auto_rotation
     if cheat_mode and not gameover:
-        auto_rotation += 1
-        
+        auto_rotation+=1
         if len(enemies) > 0:
-            # Find nearest enemy
-            nearest_enemy = None
-            min_distance = float('inf')
-            
+            nearest_enemy=None
+            min_distance=float('inf')
             for enemy in enemies:
-                dx = enemy[0] - p_pos[0]
-                dy = enemy[1] - p_pos[1]
-                distance = math.sqrt(dx**2 + dy**2)
-                
-                if distance < min_distance:
-                    min_distance = distance
-                    nearest_enemy = enemy
-            
+                dx=enemy[0]-p_pos[0]
+                dy=enemy[1]-p_pos[1]
+                distance=math.sqrt(dx**2+dy**2)
+                if distance<min_distance:
+                    min_distance=distance
+                    nearest_enemy=enemy
             if nearest_enemy:
-                # Aim at nearest enemy
-                dx = nearest_enemy[0] - p_pos[0]
-                dy = nearest_enemy[1] - p_pos[1]
-                
-                if dx == 0:
-                    if dy > 0:
-                        p_angle = 90
+                dx=nearest_enemy[0]-p_pos[0]
+                dy=nearest_enemy[1]-p_pos[1]
+                if dx==0:
+                    if dy>0:
+                        p_angle=90
                     else:
-                        p_angle = 270
+                        p_angle=270
                 else:
-                    angle_rad = math.atan(dy / dx)
-                    p_angle = math.degrees(angle_rad)
-                    if dx < 0:
-                        p_angle += 180
-                
-                # Auto-fire periodically
-                if int(auto_rotation) % 30 == 0:
-                    fire_missile()
+                    angle_rad=math.atan(dy/dx)
+                    p_angle=math.degrees(angle_rad)
+                    if dx<0:
+                        p_angle+=180
 
+                if int(auto_rotation)%30==0:
+                    fire_missile()
 def keyboardListener(key,x,y):
-    global p_moving_forward, p_moving_backward, cheat_mode, cheat_vision, gameover, p_life, score, missed, missiles, p_alive, p_angle
-    global difficulty, max_mines, current_mines 
-    global wind_active, wind_radius
-    # SHAKIB
-    global fire_times, oheat, oheat_timer, fuel, fuel_delay
-    # SHAKIB 
+    global p_moving_forward,p_moving_backward,cheat_mode,cheat_vision,gameover,p_life,score,missed,missiles,p_alive,p_angle
+    global difficulty,max_mines,current_mines 
+    global wind_active,wind_radius
+    global fire_times,oheat,oheat_timer,fuel,fuel_delay
 
     if key==b'w' and not gameover and not cheat_mode:
         p_moving_forward = True
@@ -1026,23 +995,16 @@ def keyboardListener(key,x,y):
         p_angle+=5
     if key==b'd' and not gameover and not cheat_mode:
         p_angle-=5
-    # cheat mode
-    if key == b'c' and not gameover:
-        # SHAKIB - Clear overheat when toggling cheat mode
-        oheat = False
-        oheat_timer = 0
-        fire_times = []
-        # SHAKIB
+    if key==b'c' and not gameover:
+        oheat=False
+        oheat_timer=0
+        fire_times=[]
         cheat_mode=not cheat_mode
-        # SHAKIB
         if cheat_mode:
-            fuel = fuel_max
+            fuel=fuel_max
             fuel_delay = 0
-        # SHAKIB
-    # cheat
-    if key == b'v' and cheat_mode and not gameover:
+    if key==b'v' and cheat_mode and not gameover:
         cheat_vision=not cheat_vision
-    # Reset
     if key==b'r':
         gameover=False
         p_life=5
@@ -1058,121 +1020,103 @@ def keyboardListener(key,x,y):
         initialize_enemies()
         cheat_mode=False
         cheat_vision=False
-        max_mines = 5
-        current_mines = 0
+        max_mines=5
+        current_mines=0
         drones.clear()
         mines.clear()
-        # SHAKIB
         bonus_pts.clear()
         life_pts.clear()
         inv_pts.clear()
-        bonus_delay = 0
-        life_delay = 0
-        inv_delay = 0
-        inv_active = False
-        inv_timer = 0
-        # SHAKIB
-        fire_times = []
-        oheat = False
-        oheat_timer = 0
-        fuel = 10.0
-        fuel_delay = 0
-        # SHAKIB
+        bonus_delay=0
+        life_delay=0
+        inv_delay=0
+        inv_active=False
+        inv_timer=0
+        fire_times=[]
+        oheat=False
+        oheat_timer=0
+        fuel=10.0
+        fuel_delay=0
+        
         for i in range(max_bonus):
             spawn_bonus_pt()
         for i in range(max_life):
             spawn_life_pt()
         for i in range(max_inv):
             spawn_inv_pt()
-        # SHAKIB
         apply_difficulty()
-
-    if key == b'1' and not gameover:
+    if key==b'1' and not gameover:
         difficulty = "EASY"
         apply_difficulty()
         initialize_enemies()
-
-    if key == b'2'and not gameover:
+    if key==b'2'and not gameover:
         difficulty = "MEDIUM"
         apply_difficulty()
         initialize_enemies()
-
-    if key == b'3' and not gameover:
-        difficulty = "HARD"
+    if key==b'3' and not gameover:
+        difficulty="HARD"
         apply_difficulty()
         initialize_enemies()
-
-    if key == b'm' and not gameover:
+    if key==b'm' and not gameover:
         drop_mine()
-
-    if key == b'n' and not gameover:
+    if key==b'n' and not gameover:
         spawn_drone()
-
-    if key == b'b' and not gameover:
+    if key==b'b' and not gameover:
         if not wind_active:
-            wind_active = True
-            wind_radius = 0  
-
-def keyboardUpListener(key, x, y):
+            wind_active=True
+            wind_radius=0  
+def keyboardUpListener(key,x,y):
     global p_moving_forward, p_moving_backward
     if key==b'w':
         p_moving_forward=False
     if key==b's':
         p_moving_backward=False
-
 def update_player_movement():
-    global p_pos, fuel, fuel_delay
+    global p_pos,fuel,fuel_delay
     if gameover:
         return
     if p_moving_forward:
-        # SHAKIB
-        if fuel <= 0 and not cheat_mode:
+        if fuel <=0 and not cheat_mode:
             return
-        # SHAKIB
         angle_rad=math.radians(p_angle)
         new_x=p_pos[0]+15*math.cos(angle_rad)
         new_y=p_pos[1]+15*math.sin(angle_rad)
         if abs(new_x)<grid_length-50 and abs(new_y)<grid_length-50:
             p_pos[0]=new_x
             p_pos[1]=new_y
-            # SHAKIB
             if not cheat_mode:
-                fuel -= fuel_consume
-                if fuel <= 0:
-                    fuel = 0
-                    fuel_delay = fuel_delay_time
-            # SHAKIB
+                fuel-=fuel_consume
+                if fuel<=0:
+                    fuel=0
+                    fuel_delay=fuel_delay_time
     if p_moving_backward:
-        # SHAKIB
-        if fuel <= 0 and not cheat_mode:
+        if fuel<=0 and not cheat_mode:
             return
-        # SHAKIB
         angle_rad=math.radians(p_angle)
         new_x=p_pos[0]-15*math.cos(angle_rad)
         new_y=p_pos[1]-15*math.sin(angle_rad)
         if abs(new_x)<grid_length-50 and abs(new_y)<grid_length-50:
             p_pos[0]=new_x
-            p_pos[1]= new_y
-            # SHAKIB
+            p_pos[1]=new_y
+            
             if not cheat_mode:
-                fuel -= fuel_consume
-                if fuel <= 0:
-                    fuel = 0
-                    fuel_delay = fuel_delay_time
-            # SHAKIB
-
-def specialKeyListener(key, x, y): # arrow keys
-    global cam_angle, cam_height
-    if key == GLUT_KEY_UP:
-        cam_height += 10
-        if cam_height > 800:
-            cam_height = 800
-    if key == GLUT_KEY_DOWN:
-        cam_height -= 10
-        if cam_height < 100:
-            cam_height = 100
-    if key == GLUT_KEY_LEFT:
-        cam_angle += 5
+                fuel-=fuel_consume
+                if fuel<=0:
+                    fuel=0
+                    fuel_delay=fuel_delay_time
+            
+def specialKeyListener(key,x,y): 
+    global cam_angle,cam_height
+    if key==GLUT_KEY_UP:
+        cam_height+=10
+        if cam_height>800:
+            cam_height=800
+    if key==GLUT_KEY_DOWN:
+        cam_height-=10
+        if cam_height<100:
+            cam_height=100
+    if key==GLUT_KEY_LEFT:
+        cam_angle+=5
     if key==GLUT_KEY_RIGHT:
         cam_angle-=5
 def mouseListener(button,state,x,y):
@@ -1188,32 +1132,27 @@ def mouseListener(button,state,x,y):
 def setupCamera():
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(fovY, 1.25, 0.1, 1500)
+    gluPerspective(fovY,1.25,0.1,1500)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
-    
+
     if cam_mode=="first_person" or (cheat_vision and cheat_mode):
-        # First person view from ship
         angle_rad =math.radians(p_angle)
-        cam_x=p_pos[0]-80 *math.cos(angle_rad)
-        cam_y=p_pos[1]-80 *math.sin(angle_rad)
+        cam_x=p_pos[0]-80*math.cos(angle_rad)
+        cam_y=p_pos[1]-80*math.sin(angle_rad)
         cam_z=p_pos[2]+200
-        look_x=p_pos[0]+300 *math.cos(angle_rad)
-        look_y=p_pos[1]+300 *math.sin(angle_rad)
+        look_x=p_pos[0]+300*math.cos(angle_rad)
+        look_y=p_pos[1]+300*math.sin(angle_rad)
         look_z=p_pos[2]
-        gluLookAt(cam_x, cam_y, cam_z,
-                  look_x, look_y, look_z,
-                  0, 0, 1)
+        gluLookAt(cam_x,cam_y,cam_z,
+                  look_x,look_y,look_z,0,0,1)
     else:
-        # Third person view
         angle_rad=math.radians(cam_angle)
         radius=700
         cam_x=radius*math.cos(angle_rad)
         cam_y=radius*math.sin(angle_rad)
         cam_z=cam_height
-        gluLookAt(cam_x,cam_y,cam_z,
-                  0,0,0,
-                  0,0,1)
+        gluLookAt(cam_x,cam_y,cam_z,0,0,0,0,0,1)
 def idle():
     global water_time
     water_time+=1
@@ -1224,15 +1163,12 @@ def idle():
     update_cheat_mode()
     update_mines()
     update_drones()
-    # SHAKIB
     update_bonus_pts()
     update_life_pts()
     update_inv_pts()
     update_oheat()
     update_fuel()
-    # SHAKIB
     glutPostRedisplay()
-
 def showScreen():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
@@ -1242,72 +1178,57 @@ def showScreen():
     draw_boundaries()
     draw_battleship()
     draw_wind()
-
     for enemy in enemies:
         draw_enemy_ship(enemy[0],enemy[1],enemy[2])
-
     for missile in missiles:
         draw_missile(missile[0],missile[1],missile[2])
-    
     for missile in enemy_missiles:
         draw_enemy_missile(missile[0],missile[1],missile[2])
-
     for mine in mines:
         draw_mine(mine[0],mine[1],mine[2])
     for drone in drones:
         draw_drone(drone[0],drone[1],drone[2])
-    # SHAKIB
     for pt in bonus_pts:
         draw_bonus_pt(pt[0], pt[1], pt[2])
     for pt in life_pts:
         draw_life_pt(pt[0],pt[1],pt[2])
     for pt in inv_pts:
         draw_inv_pt(pt[0],pt[1],pt[2])
-    # SHAKIB
-   
+    
     draw_text(10,770,f"Life Remaining: {p_life}")
     draw_text(10,740,f"Ships Destroyed: {score}")
     draw_text(10,710,f"Missiles Missed: {missed}")
-    draw_text(10,680,f"Mines Remaining: {max_mines - current_mines}")
-    draw_text(10,650,f"Drones Remaining: {MAX_DRONES - len(drones)}")
-    draw_text(10, 620, f"Difficulty: {difficulty}")
-    # SHAKIB
-    draw_text(10, 590, f"Fuel: {int(fuel)}")
-    # SHAKIB  
-
+    draw_text(10,680,f"Mines Remaining: {max_mines-current_mines}")
+    draw_text(10,650,f"Drones Remaining: {MAX_DRONES-len(drones)}")
+    draw_text(10, 620,f"Difficulty: {difficulty}")
+    draw_text(10,590,f"Fuel: {int(fuel)}")
+      
     if gameover:
         draw_text(350,400,"BATTLESHIP SUNK! Press R to Restart", GLUT_BITMAP_TIMES_ROMAN_24)
-        draw_text(350, 360, "HIGH SCORES")
-        y = 330
-        for i, s in enumerate(high_scores):
-            draw_text(350, y, f"{i+1}. {s}")
-            y -= 25
+        draw_text(350,360,"HIGH SCORES")
+        y=330
+        for i,s in enumerate(high_scores):
+            draw_text(350,y,f"{i+1}.{s}")
+            y-=25
     if cheat_mode:
         draw_text(10,560,"AUTO-AIM ENGAGED")
-    # SHAKIB
     draw_oheat_indicator()
-    # SHAKIB
     glutSwapBuffers()
-
 def main():
     glutInit()
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH)
-    glutInitWindowSize(1000, 800)
-    glutInitWindowPosition(0, 0)
-    wind = glutCreateWindow(b"Battleship - 3D Naval Combat")
-
+    glutInitWindowSize(1000,800)
+    glutInitWindowPosition(0,0)
+    wind=glutCreateWindow(b"Battleship - 3D Naval Combat")
     glEnable(GL_DEPTH_TEST)
     apply_difficulty()
     initialize_enemies()
-    # SHAKIB
     for i in range(max_bonus):
         spawn_bonus_pt()
     for i in range(max_life):
         spawn_life_pt()
     for i in range(max_inv):
         spawn_inv_pt()
-    # SHAKIB
-
     glutDisplayFunc(showScreen)
     glutKeyboardFunc(keyboardListener)
     glutKeyboardUpFunc(keyboardUpListener)
@@ -1316,6 +1237,5 @@ def main():
     glutIdleFunc(idle)
     load_high_scores()
     glutMainLoop()
-
-if __name__ == "__main__":
+if __name__=="__main__":
     main()
