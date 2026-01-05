@@ -1388,20 +1388,16 @@ def showScreen():
         draw_enemy_missile(missile[0],missile[1],missile[2])
 
     for mine in mines:
-        draw_mine(mine[0], mine[1], mine[2])
-
+        draw_mine(mine[0],mine[1],mine[2])
     for drone in drones:
-        draw_drone(drone[0], drone[1], drone[2])
-   
+        draw_drone(drone[0],drone[1],drone[2])
     # SHAKIB
     for pt in bonus_pts:
         draw_bonus_pt(pt[0], pt[1], pt[2])
-    
     for pt in life_pts:
-        draw_life_pt(pt[0], pt[1], pt[2])
-    
+        draw_life_pt(pt[0],pt[1],pt[2])
     for pt in inv_pts:
-        draw_inv_pt(pt[0], pt[1], pt[2])
+        draw_inv_pt(pt[0],pt[1],pt[2])
     # SHAKIB
    
     draw_text(10,770,f"Life Remaining: {p_life}")
