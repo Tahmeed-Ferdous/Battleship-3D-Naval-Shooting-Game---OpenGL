@@ -553,6 +553,13 @@ def check_oheat():
 
 def update_oheat():
     global oheat, oheat_timer, fire_times
+    # SHAKIB
+    if cheat_mode:
+        oheat = False
+        oheat_timer = 0
+        fire_times = []
+        return
+    # SHAKIB
     if oheat:
         oheat_timer -= 1
         if oheat_timer <= 0:
@@ -978,7 +985,7 @@ def draw_boundaries():
 
 def fire_missile():
     # SHAKIB
-    if oheat:
+    if oheat and not cheat_mode:
         return
     # SHAKIB
     if not gameover:
@@ -988,8 +995,9 @@ def fire_missile():
         missile_z = p_pos[2]
         missiles.append([missile_x, missile_y, missile_z, p_angle])
         # SHAKIB
-        fire_times.append(water_time)
-        check_oheat()
+        if not cheat_mode:
+            fire_times.append(water_time)
+            check_oheat()
         # SHAKIB
 
 def update_missiles():
@@ -1176,6 +1184,14 @@ def keyboardListener(key,x,y):
     # cheat mode
     if key == b'c' and not gameover:
         cheat_mode=not cheat_mode
+        # SHAKIB
+        if cheat_mode:
+            oheat = False
+            oheat_timer = 0
+            fire_times = []
+            fuel = fuel_max
+            fuel_delay = 0
+        # SHAKIB
     # cheat
     if key == b'v' and cheat_mode and not gameover:
         cheat_vision=not cheat_vision
@@ -1263,7 +1279,7 @@ def update_player_movement():
         return
     if p_moving_forward:
         # SHAKIB
-        if fuel <= 0:
+        if fuel <= 0 and not cheat_mode:
             return
         # SHAKIB
         angle_rad=math.radians(p_angle)
@@ -1273,14 +1289,15 @@ def update_player_movement():
             p_pos[0]=new_x
             p_pos[1]=new_y
             # SHAKIB
-            fuel -= fuel_consume
-            if fuel <= 0:
-                fuel = 0
-                fuel_delay = fuel_delay_time
+            if not cheat_mode:
+                fuel -= fuel_consume
+                if fuel <= 0:
+                    fuel = 0
+                    fuel_delay = fuel_delay_time
             # SHAKIB
     if p_moving_backward:
         # SHAKIB
-        if fuel <= 0:
+        if fuel <= 0 and not cheat_mode:
             return
         # SHAKIB
         angle_rad=math.radians(p_angle)
@@ -1290,10 +1307,11 @@ def update_player_movement():
             p_pos[0]=new_x
             p_pos[1]= new_y
             # SHAKIB
-            fuel -= fuel_consume
-            if fuel <= 0:
-                fuel = 0
-                fuel_delay = fuel_delay_time
+            if not cheat_mode:
+                fuel -= fuel_consume
+                if fuel <= 0:
+                    fuel = 0
+                    fuel_delay = fuel_delay_time
             # SHAKIB
 
 def specialKeyListener(key, x, y): # arrow keys
