@@ -3,13 +3,11 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 import random
 import math
-
 cam_pos = [0, 500, 500]
 cam_angle = 0 
 cam_height = 500
-cam_mode = "third_person"
-
-p_pos = [0, 0, 0]
+cam_mode= "third_person"
+p_pos =[0, 0, 0]
 p_angle = 0
 p_life = 5
 p_alive = True
