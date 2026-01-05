@@ -489,494 +489,425 @@ def draw_oheat_indicator():
         return
     remain=oheat_timer/float(oheat_duration)
     pulse=0.3*math.sin(water_time*0.2)
-    
-    glColor3f(1.0, 0.0 + pulse, 0.0)
-    draw_text(400, 500, "OVERHEATED!", GLUT_BITMAP_TIMES_ROMAN_24)
-    
-    bar_w = 200
-    bar_h = 20
-    bar_x = 400
-    bar_y = 460
-    
+    glColor3f(1.0,0.0+pulse,0.0)
+    draw_text(400,500,"OVERHEATED!",GLUT_BITMAP_TIMES_ROMAN_24)
+    bar_w=200
+    bar_h=20
+    bar_x=400
+    bar_y=460
     glMatrixMode(GL_PROJECTION)
     glPushMatrix()
     glLoadIdentity()
-    gluOrtho2D(0, 1000, 0, 800)
+    gluOrtho2D(0,1000,0,800)
     glMatrixMode(GL_MODELVIEW)
     glPushMatrix()
     glLoadIdentity()
-    
-    glColor3f(0.3, 0.0, 0.0)
+    glColor3f(0.3,0.0,0.0)
     glBegin(GL_QUADS)
-    glVertex2f(bar_x, bar_y)
-    glVertex2f(bar_x + bar_w, bar_y)
-    glVertex2f(bar_x + bar_w, bar_y + bar_h)
-    glVertex2f(bar_x, bar_y + bar_h)
+    glVertex2f(bar_x,bar_y)
+    glVertex2f(bar_x+bar_w,bar_y)
+    glVertex2f(bar_x+bar_w,bar_y+bar_h)
+    glVertex2f(bar_x,bar_y+bar_h)
     glEnd()
-    
-    glColor3f(1.0, 0.2, 0.0)
+    glColor3f(1.0,0.2,0.0)
     glBegin(GL_QUADS)
-    glVertex2f(bar_x, bar_y)
-    glVertex2f(bar_x + bar_w * remain, bar_y)
-    glVertex2f(bar_x + bar_w * remain, bar_y + bar_h)
-    glVertex2f(bar_x, bar_y + bar_h)
+    glVertex2f(bar_x,bar_y)
+    glVertex2f(bar_x+bar_w*remain,bar_y)
+    glVertex2f(bar_x+bar_w*remain,bar_y+bar_h)
+    glVertex2f(bar_x,bar_y+bar_h)
     glEnd()
-    
-    glColor3f(1.0, 1.0, 1.0)
+    glColor3f(1.0,1.0,1.0)
     glLineWidth(2)
     glBegin(GL_LINE_LOOP)
-    glVertex2f(bar_x, bar_y)
-    glVertex2f(bar_x + bar_w, bar_y)
-    glVertex2f(bar_x + bar_w, bar_y + bar_h)
-    glVertex2f(bar_x, bar_y + bar_h)
+    glVertex2f(bar_x,bar_y)
+    glVertex2f(bar_x+bar_w,bar_y)
+    glVertex2f(bar_x+bar_w,bar_y+bar_h)
+    glVertex2f(bar_x,bar_y+bar_h)
     glEnd()
-    
     glPopMatrix()
     glMatrixMode(GL_PROJECTION)
     glPopMatrix()
     glMatrixMode(GL_MODELVIEW)
-
 def update_fuel():
-    global fuel, fuel_delay
-    if fuel_delay > 0:
-        fuel_delay -= 1
+    global fuel,fuel_delay
+    if fuel_delay>0:
+        fuel_delay-=1
         return
-    
     if not p_moving_forward and not p_moving_backward:
-        fuel += fuel_regen
-        if fuel > fuel_max:
-            fuel = fuel_max
+        fuel+=fuel_regen
+        if fuel>fuel_max:
+            fuel=fuel_max
 # SHAKIB
-
 def apply_difficulty():
-    global enemy_speed, enemy_fire_rate, enemy_missile_speed
+    global enemy_speed,enemy_fire_rate,enemy_missile_speed
     global max_missed
-    settings = DIFFICULTY_SETTINGS[difficulty]
-    enemy_speed = settings["enemy_speed"]
-    enemy_fire_rate = settings["enemy_fire_rate"]
-    enemy_missile_speed = settings["enemy_missile_speed"]
-    max_missed = settings["max_missed"]
-    enemy_fire_cooldown = 0
-
+    settings=DIFFICULTY_SETTINGS[difficulty]
+    enemy_speed=settings["enemy_speed"]
+    enemy_fire_rate=settings["enemy_fire_rate"]
+    enemy_missile_speed=settings["enemy_missile_speed"]
+    max_missed=settings["max_missed"]
+    enemy_fire_cooldown=0
 def load_high_scores():
     global high_scores
     try:
-        with open(HIGH_SCORE_FILE, "r") as f:
-            high_scores = [int(line.strip()) for line in f.readlines()]
+        with open(HIGH_SCORE_FILE,"r") as f:
+            high_scores=[int(line.strip()) for line in f.readlines()]
     except:
-        high_scores = []
-
+        high_scores=[]
 def save_high_scores():
-    with open(HIGH_SCORE_FILE, "w") as f:
+    with open(HIGH_SCORE_FILE,"w") as f:
         for s in high_scores[:TOP_N]:
-            f.write(str(s) + "\n")
-
+            f.write(str(s)+"\n")
 def update_high_scores(new_score):
     global high_scores
     high_scores.append(new_score)
-    high_scores = sorted(high_scores, reverse=True)[:TOP_N]
+    high_scores=sorted(high_scores, reverse=True)[:TOP_N]
     save_high_scores()
-
-
-def draw_text(x, y, text, font=GLUT_BITMAP_HELVETICA_18):
-    glColor3f(1, 1, 1)
+def draw_text(x, y,text,font=GLUT_BITMAP_HELVETICA_18):
+    glColor3f(1,1,1)
     glMatrixMode(GL_PROJECTION)
     glPushMatrix()
     glLoadIdentity()
-    gluOrtho2D(0, 1000, 0, 800)
+    gluOrtho2D(0,1000,0,800)
     glMatrixMode(GL_MODELVIEW)
     glPushMatrix()
     glLoadIdentity()
-    glRasterPos2f(x, y)
+    glRasterPos2f(x,y)
     for ch in text:
-        glutBitmapCharacter(font, ord(ch))
+        glutBitmapCharacter(font,ord(ch))
     glPopMatrix()
     glMatrixMode(GL_PROJECTION)
     glPopMatrix()
     glMatrixMode(GL_MODELVIEW)
-
 def initialize_enemies():
     global enemies
-    enemies = []
-
-    count = DIFFICULTY_SETTINGS[difficulty]["enemy_count"]
-
+    enemies=[]
+    count=DIFFICULTY_SETTINGS[difficulty]["enemy_count"]
     for i in range(count):
         while True:
-            x = random.uniform(-grid_length + 100, grid_length - 100)
-            y = random.uniform(-grid_length + 100, grid_length - 100)
-            if abs(x) > 150 or abs(y) > 150:
-                enemies.append([x, y, 0])
+            x=random.uniform(-grid_length+100,grid_length-100)
+            y=random.uniform(-grid_length+100,grid_length-100)
+            if abs(x)>150 or abs(y)>150:
+                enemies.append([x,y,0])
                 break
-
-
 def respawn_enemy(index):
     while True:
-        x = random.uniform(-grid_length + 100, grid_length - 100)
-        y = random.uniform(-grid_length + 100, grid_length - 100)
-        px, py, pz = p_pos
-        if math.sqrt((x - px)**2 + (y - py)**2) > 200:
-            enemies[index] = [x, y, 0]
+        x=random.uniform(-grid_length+100,grid_length-100)
+        y=random.uniform(-grid_length+100,grid_length-100)
+        px,py,pz=p_pos
+        if math.sqrt((x-px)**2+(y-py)**2)>200:
+            enemies[index]=[x,y,0]
             break
-
 def draw_battleship():
     # SHAKIB
-    if inv_active and (water_time % 10 < 5):
+    if inv_active and (water_time%10<5):
         return
     # SHAKIB
-    
     glPushMatrix()
-    glTranslatef(p_pos[0], p_pos[1], p_pos[2])
-    glRotatef(p_angle, 0, 0, 1)
-    
+    glTranslatef(p_pos[0],p_pos[1],p_pos[2])
+    glRotatef(p_angle,0,0,1)
     if gameover:
-        glRotatef(90, 0, 1, 0) 
-    
+        glRotatef(90,0,1,0) 
     glPushMatrix()
-    glTranslatef(0, 0, 5)
-    glColor3f(0.3, 0.3, 0.35)
-    glScalef(2.5, 0.8, 0.3)
+    glTranslatef(0,0,5)
+    glColor3f(0.3,0.3,0.35)
+    glScalef(2.5,0.8,0.3)
     glutSolidCube(30)
     glPopMatrix()
-
     glPushMatrix()
-    glTranslatef(0, 0, 20)
-    glColor3f(0.5, 0.5, 0.55)
-    glScalef(2.0, 0.6, 0.4)
+    glTranslatef(0,0,20)
+    glColor3f(0.5,0.5,0.55)
+    glScalef(2.0,0.6,0.4)
     glutSolidCube(30)
     glPopMatrix()
-    
     glPushMatrix()
-    glTranslatef(-10, 0, 35)
-    glColor3f(0.4, 0.4, 0.45)
-    glScalef(0.8, 0.6, 1.0)
+    glTranslatef(-10,0,35)
+    glColor3f(0.4,0.4,0.45)
+    glScalef(0.8,0.6,1.0)
     glutSolidCube(25)
     glPopMatrix()
-    
     glPushMatrix()
-    glTranslatef(-10, 0, 55)
-    glColor3f(0.6, 0.6, 0.65)
-    glScalef(0.3, 0.3, 0.8)
-    glutSolidCube(20)
-    glPopMatrix()
-    
-    glPushMatrix()
-    glTranslatef(-10, 0, 65)
-    glColor3f(0.7, 0.7, 0.1)
-    glRotatef(90, 1, 0, 0)
-    glutSolidTorus(3, 8, 8, 12)
-    glPopMatrix()
-
-    glPushMatrix()
-    glTranslatef(20, 0, 25)
-    glColor3f(0.35, 0.35, 0.4)
-    gluCylinder(gluNewQuadric(), 12, 12, 15, 12, 1)
-    glPopMatrix()
-    
-    glPushMatrix()
-    glTranslatef(20, 5, 30)
-    glRotatef(90, 0, 1, 0)
-    glColor3f(0.2, 0.2, 0.25)
-    gluCylinder(gluNewQuadric(), 4, 4, 45, 10, 1)
-    glPopMatrix()
-    
-    glPushMatrix()
-    glTranslatef(20, -5, 30)
-    glRotatef(90, 0, 1, 0)
-    glColor3f(0.2, 0.2, 0.25)
-    gluCylinder(gluNewQuadric(), 4, 4, 45, 10, 1)
-    glPopMatrix()
-    
-    glPushMatrix()
-    glTranslatef(0, 18, 22)
-    glColor3f(0.3, 0.3, 0.35)
-    gluSphere(gluNewQuadric(), 8, 10, 10)
-    glPopMatrix()
-    
-    glPushMatrix()
-    glTranslatef(0, -18, 22)
-    glColor3f(0.3, 0.3, 0.35)
-    gluSphere(gluNewQuadric(), 8, 10, 10)
-    glPopMatrix()
-    
-    glPushMatrix()
-    glTranslatef(-25, 8, 35)
-    glColor3f(0.8, 0.3, 0.1)
-    gluCylinder(gluNewQuadric(), 5, 4, 25, 10, 1)
-    glPopMatrix()
-    
-    glPushMatrix()
-    glTranslatef(-25, -8, 35)
-    glColor3f(0.8, 0.3, 0.1)
-    gluCylinder(gluNewQuadric(), 5, 4, 25, 10, 1)
-    glPopMatrix()
-    
-    glPushMatrix()
-    glTranslatef(45, 0, 15)
-    glRotatef(90, 0, 1, 0)
-    glColor3f(0.35, 0.35, 0.4)
-    glutSolidCone(12, 25, 10, 10)
-    glPopMatrix()
-
-    glPushMatrix()
-    glTranslatef(-50, 0, 10)
-    glColor3f(0.3, 0.3, 0.35)
-    glScalef(0.3, 0.8, 0.4)
+    glTranslatef(-10,0,55)
+    glColor3f(0.6,0.6,0.65)
+    glScalef(0.3,0.3,0.8)
     glutSolidCube(20)
     glPopMatrix()
     glPushMatrix()
-    glTranslatef(-40, 0, 35)
-    glColor3f(0.6, 0.5, 0.3)
-    gluCylinder(gluNewQuadric(), 1, 1, 30, 8, 1)
+    glTranslatef(-10,0,65)
+    glColor3f(0.7,0.7,0.1)
+    glRotatef(90,1,0,0)
+    glutSolidTorus(3,8,8,12)
     glPopMatrix()
-
     glPushMatrix()
-    glTranslatef(-40, 0, 60)
-    glColor3f(0.9, 0.1, 0.1)
-    glScalef(0.3, 0.6, 0.05)
+    glTranslatef(20,0,25)
+    glColor3f(0.35,0.35,0.4)
+    gluCylinder(gluNewQuadric(),12,12,15,12,1)
+    glPopMatrix()
+    glPushMatrix()
+    glTranslatef(20,5,30)
+    glRotatef(90,0,1,0)
+    glColor3f(0.2,0.2,0.25)
+    gluCylinder(gluNewQuadric(),4,4,45,10,1)
+    glPopMatrix()
+    glPushMatrix()
+    glTranslatef(20,-5,30)
+    glRotatef(90,0,1,0)
+    glColor3f(0.2,0.2,0.25)
+    gluCylinder(gluNewQuadric(),4,4,45,10,1)
+    glPopMatrix()
+    glPushMatrix()
+    glTranslatef(0,18,22)
+    glColor3f(0.3,0.3,0.35)
+    gluSphere(gluNewQuadric(),8,10,10)
+    glPopMatrix()
+    glPushMatrix()
+    glTranslatef(0,-18,22)
+    glColor3f(0.3,0.3,0.35)
+    gluSphere(gluNewQuadric(),8,10,10)
+    glPopMatrix()
+    glPushMatrix()
+    glTranslatef(-25,8,35)
+    glColor3f(0.8,0.3,0.1)
+    gluCylinder(gluNewQuadric(),5,4,25,10,1)
+    glPopMatrix()
+    glPushMatrix()
+    glTranslatef(-25,-8,35)
+    glColor3f(0.8,0.3,0.1)
+    gluCylinder(gluNewQuadric(),5,4,25,10,1)
+    glPopMatrix()
+    glPushMatrix()
+    glTranslatef(45,0,15)
+    glRotatef(90,0,1,0)
+    glColor3f(0.35,0.35,0.4)
+    glutSolidCone(12,25,10,10)
+    glPopMatrix()
+    glPushMatrix()
+    glTranslatef(-50,0,10)
+    glColor3f(0.3,0.3,0.35)
+    glScalef(0.3,0.8,0.4)
+    glutSolidCube(20)
+    glPopMatrix()
+    glPushMatrix()
+    glTranslatef(-40,0,35)
+    glColor3f(0.6,0.5,0.3)
+    gluCylinder(gluNewQuadric(),1,1,30,8,1)
+    glPopMatrix()
+    glPushMatrix()
+    glTranslatef(-40,0,60)
+    glColor3f(0.9,0.1,0.1)
+    glScalef(0.3,0.6,0.05)
     glutSolidCube(15)
     glPopMatrix()
-    
     glPopMatrix()
-
-def draw_enemy_ship(x, y, z):
+def draw_enemy_ship(x,y,z):
     glPushMatrix()
-    glTranslatef(x, y, z)
-    
-    wave_offset = math.sin(water_time * wave_frequency + x * 0.01 + y * 0.01) * wave_amplitude
-    glTranslatef(0, 0, wave_offset)
+    glTranslatef(x,y,z)
+    wave_offset=math.sin(water_time*wave_frequency+x*0.01+y*0.01)*wave_amplitude
+    glTranslatef(0,0,wave_offset)
     glPushMatrix()
-    glTranslatef(0, 0, 10)
-    glColor3f(0.8, 0.1, 0.1)
-    glScalef(1.5 * enemy_size_factor, 0.6 * enemy_size_factor, 0.4 * enemy_size_factor)
+    glTranslatef(0,0,10)
+    glColor3f(0.8,0.1,0.1)
+    glScalef(1.5*enemy_size_factor,0.6*enemy_size_factor,0.4*enemy_size_factor)
     glutSolidCube(35)
     glPopMatrix()
-    
     glPushMatrix()
-    glTranslatef(0, 0, 22)
-    glColor3f(0.6, 0.1, 0.1)
-    glScalef(1.0 * enemy_size_factor, 0.4 * enemy_size_factor, 0.3 * enemy_size_factor)
+    glTranslatef(0,0,22)
+    glColor3f(0.6,0.1,0.1)
+    glScalef(1.0*enemy_size_factor,0.4*enemy_size_factor,0.3*enemy_size_factor)
     glutSolidCube(30)
     glPopMatrix()
-    
     glPushMatrix()
-    glTranslatef(0, 0, 32)
-    glColor3f(0.4, 0.1, 0.1)
-    gluSphere(gluNewQuadric(), 12 * enemy_size_factor, 10, 10)
+    glTranslatef(0,0,32)
+    glColor3f(0.4,0.1,0.1)
+    gluSphere(gluNewQuadric(),12*enemy_size_factor,10,10)
     glPopMatrix()
-    
     glPushMatrix()
-    glTranslatef(10 * enemy_size_factor, 0, 25)
-    glColor3f(0.3, 0.1, 0.1)
-    gluCylinder(gluNewQuadric(), 8 * enemy_size_factor, 8 * enemy_size_factor, 10 * enemy_size_factor, 10, 1)
+    glTranslatef(10*enemy_size_factor,0,25)
+    glColor3f(0.3,0.1,0.1)
+    gluCylinder(gluNewQuadric(),8*enemy_size_factor,8*enemy_size_factor,10*enemy_size_factor,10,1)
     glPopMatrix()
     
     glPushMatrix()
-    glTranslatef(-10 * enemy_size_factor, 0, 28)
-    glColor3f(0.2, 0.2, 0.2)
-    gluCylinder(gluNewQuadric(), 4 * enemy_size_factor, 3 * enemy_size_factor, 15 * enemy_size_factor, 8, 1)
+    glTranslatef(-10*enemy_size_factor,0,28)
+    glColor3f(0.2,0.2,0.2)
+    gluCylinder(gluNewQuadric(),4*enemy_size_factor,3*enemy_size_factor,15*enemy_size_factor,8,1)
     glPopMatrix()
     glPushMatrix()
-    glTranslatef(-10 * enemy_size_factor, 0, 45 * enemy_size_factor)
-    glColor3f(0.5, 0.5, 0.5)
-    gluSphere(gluNewQuadric(), 5 * enemy_size_factor, 6, 6)
+    glTranslatef(-10*enemy_size_factor,0,45*enemy_size_factor)
+    glColor3f(0.5,0.5,0.5)
+    gluSphere(gluNewQuadric(),5*enemy_size_factor,6,6)
     glPopMatrix()
-    
     glPopMatrix()
-
-def draw_missile(x, y, z):
+def draw_missile(x,y,z):
     glPushMatrix()
-    glTranslatef(x, y, z + 20)
-    
-    glColor3f(0.9, 0.9, 0.1)
-    glRotatef(-90, 1, 0, 0)
-    gluCylinder(gluNewQuadric(), 3, 3, 15, 8, 1)
-    
-    glTranslatef(0, 0, 15)
-    glColor3f(1.0, 0.5, 0.0)
-    glutSolidCone(3, 8, 8, 8)
-    
+    glTranslatef(x,y,z+20)
+    glColor3f(0.9,0.9,0.1)
+    glRotatef(-90,1,0, 0)
+    gluCylinder(gluNewQuadric(),3,3,15,8,1)
+    glTranslatef(0,0,15)
+    glColor3f(1.0,0.5,0.0)
+    glutSolidCone(3,8,8,8)
     glPopMatrix()
-
-def draw_enemy_missile(x, y, z):
+def draw_enemy_missile(x,y,z):
     glPushMatrix()
-    glTranslatef(x, y, z + 20)
-    
-    glColor3f(1.0, 0.2, 0.1)
-    glRotatef(-90, 1, 0, 0)
-    gluCylinder(gluNewQuadric(), 3, 3, 15, 8, 1)
-
-    glTranslatef(0, 0, 15)
-    glColor3f(0.8, 0.1, 0.0)
-    glutSolidCone(3, 8, 8, 8)
-    
+    glTranslatef(x,y,z+20)
+    glColor3f(1.0,0.2,0.1)
+    glRotatef(-90,1,0,0)
+    gluCylinder(gluNewQuadric(),3,3,15,8,1)
+    glTranslatef(0,0,15)
+    glColor3f(0.8,0.1,0.0)
+    glutSolidCone(3,8,8,8)
     glPopMatrix()
-
 def draw_ocean_grid():
-    square_size = 60
-
-    for i in range(-30, 30):
-        for j in range(-30, 30):
-            x_start = i * square_size
-            y_start = j * square_size
-            wave1 = math.sin(water_time * wave_frequency + x_start * 0.01) * wave_amplitude
-            wave2 = math.sin(water_time * wave_frequency + (x_start + square_size) * 0.01) * wave_amplitude
-            wave3 = math.sin(water_time * wave_frequency + y_start * 0.01) * wave_amplitude
-            wave4 = math.sin(water_time * wave_frequency + (y_start + square_size) * 0.01) * wave_amplitude
-            if (i + j) % 2 == 0:
-                glColor3f(0.0, 0.4, 0.7)
+    square_size=60
+    for i in range(-30,30):
+        for j in range(-30,30):
+            x_start=i*square_size
+            y_start=j*square_size
+            wave1=math.sin(water_time*wave_frequency+x_start*0.01)*wave_amplitude
+            wave2=math.sin(water_time*wave_frequency+(x_start+square_size)*0.01)*wave_amplitude
+            wave3=math.sin(water_time*wave_frequency+y_start*0.01)*wave_amplitude
+            wave4=math.sin(water_time*wave_frequency+(y_start + square_size)*0.01)*wave_amplitude
+            if (i+j)%2==0:
+                glColor3f(0.0,0.4,0.7)
             else:
-                glColor3f(0.1, 0.5, 0.8) 
+                glColor3f(0.1,0.5,0.8) 
             glBegin(GL_QUADS)
-            glVertex3f(x_start, y_start, wave1)
-            glVertex3f(x_start + square_size, y_start, wave2)
-            glVertex3f(x_start + square_size, y_start + square_size, wave4)
-            glVertex3f(x_start, y_start + square_size, wave3)
+            glVertex3f(x_start,y_start,wave1)
+            glVertex3f(x_start+square_size,y_start,wave2)
+            glVertex3f(x_start+square_size,y_start+square_size,wave4)
+            glVertex3f(x_start,y_start+square_size,wave3)
             glEnd()
-            if abs(wave1) > wave_amplitude * 0.7 or abs(wave2) > wave_amplitude * 0.7:
-                glColor3f(0.7, 0.85, 0.95)
+            if abs(wave1)>wave_amplitude*0.7 or abs(wave2)>wave_amplitude*0.7:
+                glColor3f(0.7,0.85,0.95)
                 glPointSize(2)
                 glBegin(GL_POINTS)
-                glVertex3f(x_start, y_start, wave1 + 1)
-                glVertex3f(x_start + square_size, y_start, wave2 + 1)
+                glVertex3f(x_start,y_start,wave1+1)
+                glVertex3f(x_start+square_size,y_start,wave2+1)
                 glEnd()
-
 def draw_boundaries():
-    far_distance = grid_length * 5
-    sky_height = boundary_height * 4
+    far_distance=grid_length*5
+    sky_height=boundary_height*4
     # Front
     glBegin(GL_QUADS)
-    glColor3f(0.02, 0.02, 0.15)
-    glVertex3f(-far_distance, far_distance, 0)
-    glVertex3f(far_distance, far_distance, 0)
+    glColor3f(0.02,0.02,0.15)
+    glVertex3f(-far_distance,far_distance,0)
+    glVertex3f(far_distance,far_distance,0)
     glColor3f(0.0, 0.0, 0.05) 
-    glVertex3f(far_distance, far_distance, sky_height)
-    glVertex3f(-far_distance, far_distance, sky_height)
+    glVertex3f(far_distance,far_distance,sky_height)
+    glVertex3f(-far_distance,far_distance,sky_height)
     glEnd()
-    
     # Right
     glBegin(GL_QUADS)
-    glColor3f(0.02, 0.02, 0.15)
-    glVertex3f(far_distance, -far_distance, 0)
-    glVertex3f(far_distance, far_distance, 0)
-    glColor3f(0.0, 0.0, 0.05)
-    glVertex3f(far_distance, far_distance, sky_height)
-    glVertex3f(far_distance, -far_distance, sky_height)
+    glColor3f(0.02,0.02,0.15)
+    glVertex3f(far_distance,-far_distance,0)
+    glVertex3f(far_distance,far_distance,0)
+    glColor3f(0.0,0.0,0.05)
+    glVertex3f(far_distance,far_distance,sky_height)
+    glVertex3f(far_distance,-far_distance,sky_height)
     glEnd()
-    
     # Back
     glBegin(GL_QUADS)
-    glColor3f(0.02, 0.02, 0.15)
-    glVertex3f(-far_distance, -far_distance, 0)
-    glVertex3f(far_distance, -far_distance, 0)
-    glColor3f(0.0, 0.0, 0.05)
-    glVertex3f(far_distance, -far_distance, sky_height)
-    glVertex3f(-far_distance, -far_distance, sky_height)
+    glColor3f(0.02,0.02,0.15)
+    glVertex3f(-far_distance,-far_distance,0)
+    glVertex3f(far_distance,-far_distance,0)
+    glColor3f(0.0,0.0,0.05)
+    glVertex3f(far_distance,-far_distance,sky_height)
+    glVertex3f(-far_distance,-far_distance,sky_height)
     glEnd()
-    
     # Left
     glBegin(GL_QUADS)
-    glColor3f(0.02, 0.02, 0.15)
-    glVertex3f(-far_distance, -far_distance, 0)
-    glVertex3f(-far_distance, far_distance, 0)
-    glColor3f(0.0, 0.0, 0.05)
-    glVertex3f(-far_distance, far_distance, sky_height)
-    glVertex3f(-far_distance, -far_distance, sky_height)
+    glColor3f(0.02,0.02,0.15)
+    glVertex3f(-far_distance,-far_distance,0)
+    glVertex3f(-far_distance,far_distance,0)
+    glColor3f(0.0,0.0,0.05)
+    glVertex3f(-far_distance,far_distance,sky_height)
+    glVertex3f(-far_distance,-far_distance,sky_height)
     glEnd()
-    
-    glColor3f(1.0, 1.0, 1.0)
+    glColor3f(1.0,1.0,1.0)
     glPointSize(2)
     glBegin(GL_POINTS)
     for i in range(50):
-        star_x = (i * 123) % int(far_distance * 2) - far_distance
-        star_y = (i * 456) % int(far_distance * 2) - far_distance
-        star_z = boundary_height + (i * 78) % int(sky_height - boundary_height)
-        glVertex3f(star_x, far_distance - 100, star_z)
-        glVertex3f(star_x, -far_distance + 100, star_z)
-        glVertex3f(far_distance - 100, star_y, star_z)
-        glVertex3f(-far_distance + 100, star_y, star_z)
+        star_x=(i*123)%int(far_distance*2)-far_distance
+        star_y=(i*456)%int(far_distance*2)-far_distance
+        star_z=boundary_height+(i*78)%int(sky_height-boundary_height)
+        glVertex3f(star_x,far_distance-100,star_z)
+        glVertex3f(star_x,-far_distance+100,star_z)
+        glVertex3f(far_distance-100,star_y,star_z)
+        glVertex3f(-far_distance+100,star_y,star_z)
     glEnd()
-
 def fire_missile():
     # SHAKIB
     if oheat and not cheat_mode:
         return
     # SHAKIB
     if not gameover:
-        angle_rad = math.radians(p_angle)
-        missile_x = p_pos[0] + 60 * math.cos(angle_rad)
-        missile_y = p_pos[1] + 60 * math.sin(angle_rad)
-        missile_z = p_pos[2]
-        missiles.append([missile_x, missile_y, missile_z, p_angle])
+        angle_rad=math.radians(p_angle)
+        missile_x=p_pos[0]+60*math.cos(angle_rad)
+        missile_y=p_pos[1]+60*math.sin(angle_rad)
+        missile_z=p_pos[2]
+        missiles.append([missile_x,missile_y,missile_z,p_angle])
         # SHAKIB
         if not cheat_mode:
             fire_times.append(water_time)
             check_oheat()
         # SHAKIB
-
 def update_missiles():
-    global missiles, missed, score, gameover
-    missiles_to_remove = []
-    
-    for i, missile in enumerate(missiles):
-        angle_rad = math.radians(missile[3])
-        missile[0] += missile_speed * math.cos(angle_rad)
-        missile[1] += missile_speed * math.sin(angle_rad)
-        if (abs(missile[0]) > grid_length or abs(missile[1]) > grid_length):
+    global missiles,missed,score,gameover
+    missiles_to_remove=[]
+    for i,missile in enumerate(missiles):
+        angle_rad=math.radians(missile[3])
+        missile[0]+=missile_speed*math.cos(angle_rad)
+        missile[1]+=missile_speed*math.sin(angle_rad)
+        if (abs(missile[0])>grid_length or abs(missile[1])>grid_length):
             missiles_to_remove.append(i)
             if not cheat_mode:
-                missed += 1
-                if missed >= max_missed:
-                    gameover = True
+                missed+=1
+                if missed>=max_missed:
+                    gameover=True
                     update_high_scores(score)
             continue
-        for j, enemy in enumerate(enemies):
-            distance = math.sqrt((missile[0] - enemy[0])**2 + (missile[1] - enemy[1])**2)
-            if distance < 40:
+        for j,enemy in enumerate(enemies):
+            distance=math.sqrt((missile[0]-enemy[0])**2+(missile[1]-enemy[1])**2)
+            if distance<40:
                 missiles_to_remove.append(i)
-                score += 1
+                score+=1
                 respawn_enemy(j)
                 break
-    
     for i in sorted(missiles_to_remove, reverse=True):
-        if i < len(missiles):
+        if i<len(missiles):
             missiles.pop(i)
-
 def update_enemies():
-    global p_life, gameover, enemy_size_factor, enemy_size_growing, enemy_fire_cooldown
-    global wind_active, wind_radius
+    global p_life,gameover,enemy_size_factor,enemy_size_growing,enemy_fire_cooldown
+    global wind_active,wind_radius
     if wind_active:
-        wind_radius += 10 
+        wind_radius+=10 
         for enemy in enemies:
-            dx = enemy[0] - p_pos[0]
-            dy = enemy[1] - p_pos[1]
-            distance = math.sqrt(dx**2 + dy**2)
-            if distance < wind_radius:
-                angle_to_enemy = math.degrees(math.atan2(dy, dx))
-                angle_diff = (angle_to_enemy - p_angle + 360) % 360
-                if angle_diff > 180:
-                    angle_diff -= 360
-                if abs(angle_diff) < WIND_SPREAD_ANGLE/2:
-                    angle_rad = math.radians(p_angle)
-                    enemy[0] += math.cos(angle_rad) * WIND_PUSH_STRENGTH
-                    enemy[1] += math.sin(angle_rad) * WIND_PUSH_STRENGTH
-
-        if wind_radius > WIND_MAX_RADIUS:
-            wind_active = False  
-
+            dx=enemy[0]-p_pos[0]
+            dy=enemy[1]-p_pos[1]
+            distance=math.sqrt(dx**2+dy**2)
+            if distance<wind_radius:
+                angle_to_enemy=math.degrees(math.atan2(dy,dx))
+                angle_diff=(angle_to_enemy-p_angle+360)%360
+                if angle_diff>180:
+                    angle_diff-=360
+                if abs(angle_diff)<WIND_SPREAD_ANGLE/2:
+                    angle_rad=math.radians(p_angle)
+                    enemy[0]+=math.cos(angle_rad)*WIND_PUSH_STRENGTH
+                    enemy[1]+=math.sin(angle_rad)*WIND_PUSH_STRENGTH
+        if wind_radius>WIND_MAX_RADIUS:
+            wind_active=False  
     if gameover:
         return
     if enemy_size_growing:
-        enemy_size_factor += 0.01
-        if enemy_size_factor >= 1.2:
-            enemy_size_growing = False
+        enemy_size_factor+=0.01
+        if enemy_size_factor>=1.2:
+            enemy_size_growing=False
     else:
-        enemy_size_factor -= 0.01
-        if enemy_size_factor <= 0.8:
-            enemy_size_growing = True
-
-    enemy_fire_cooldown += 1
-
+        enemy_size_factor-=0.01
+        if enemy_size_factor<=0.8:
+            enemy_size_growing=True
+    enemy_fire_cooldown+=1
     for enemy in enemies:
         dx = p_pos[0] - enemy[0]
         dy = p_pos[1] - enemy[1]
