@@ -91,6 +91,39 @@ WIND_PUSH_STRENGTH = 10
 WIND_MAX_RADIUS = 400  
 WIND_EXPAND_SPEED = 3.0  
 
+# SHAKIB
+bonus_pts = []
+life_pts = []
+max_bonus = 1
+max_life = 1
+bonus_rad = 30
+life_rad = 30
+bonus_delay = 0
+life_delay = 0
+bonus_delay_time = 300
+life_delay_time = 300
+inv_pts = []
+max_inv = 1
+inv_rad = 30
+inv_delay = 0
+inv_delay_time = 1200
+inv_active = False
+inv_timer = 0
+inv_duration = 280
+# SHAKIB
+fire_times = []
+oheat = False
+oheat_timer = 0
+oheat_duration = 180
+oheat_threshold = 180
+fuel = 10.0
+fuel_max = 10.0
+fuel_consume = 0.5
+fuel_regen = 0.10
+fuel_delay = 0
+fuel_delay_time = 120
+# SHAKIB
+
 def draw_wind():
     global wind_radius, wind_active
 
@@ -347,6 +380,252 @@ def draw_mine(x, y, z):
 
     glPopMatrix()
 
+# SHAKIB
+def spawn_bonus_pt():
+    if len(bonus_pts) < max_bonus:
+        x = random.uniform(-grid_length + 150, grid_length - 150)
+        y = random.uniform(-grid_length + 150, grid_length - 150)
+        bonus_pts.append([x, y, 0])
+
+def spawn_life_pt():
+    if len(life_pts) < max_life:
+        x = random.uniform(-grid_length + 150, grid_length - 150)
+        y = random.uniform(-grid_length + 150, grid_length - 150)
+        life_pts.append([x, y, 0])
+
+def draw_bonus_pt(x, y, z):
+    glPushMatrix()
+    glTranslatef(x, y, z + 20)
+    
+    rot = water_time * 3 % 360
+    glRotatef(rot, 0, 0, 1)
+    
+    glow = 0.2 * math.sin(water_time * 0.1)
+    glColor3f(1.0, 0.8 + glow, 0.0)
+    glutSolidCube(25)
+    
+    glRotatef(45, 0, 0, 1)
+    glColor3f(1.0, 0.9, 0.2)
+    glutSolidCube(20)
+    
+    glColor3f(1.0, 1.0, 0.5)
+    gluSphere(gluNewQuadric(), 15, 10, 10)
+    
+    glPopMatrix()
+
+def draw_life_pt(x, y, z):
+    glPushMatrix()
+    glTranslatef(x, y, z + 20)
+    
+    bob = 5 * math.sin(water_time * 0.08)
+    glTranslatef(0, 0, bob)
+    
+    glRotatef(water_time * 2 % 360, 0, 0, 1)
+    
+    glow = 0.3 * math.sin(water_time * 0.12)
+    glColor3f(1.0, 0.1 + glow, 0.1 + glow)
+    glutSolidSphere(18, 15, 15)
+    
+    for ang in [0, 90, 180, 270]:
+        glPushMatrix()
+        glRotatef(ang, 0, 0, 1)
+        glTranslatef(12, 0, 0)
+        glColor3f(0.9, 0.0, 0.0)
+        glutSolidCube(10)
+        glPopMatrix()
+    
+    glColor3f(1.0, 0.5, 0.5)
+    glRotatef(45, 1, 0, 0)
+    glutSolidTorus(3, 10, 8, 12)
+    
+    glPopMatrix()
+
+def update_bonus_pts():
+    global bonus_pts, score, bonus_delay
+    pts_remove = []
+    
+    if bonus_delay > 0:
+        bonus_delay -= 1
+        if bonus_delay == 0 and len(bonus_pts) == 0:
+            spawn_bonus_pt()
+    
+    for i, pt in enumerate(bonus_pts):
+        dist = math.sqrt((pt[0] - p_pos[0])**2 + (pt[1] - p_pos[1])**2)
+        if dist < bonus_rad:
+            score += 1
+            pts_remove.append(i)
+    
+    for i in sorted(pts_remove, reverse=True):
+        bonus_pts.pop(i)
+        bonus_delay = bonus_delay_time
+
+def update_life_pts():
+    global life_pts, p_life, life_delay
+    pts_remove = []
+    
+    if life_delay > 0:
+        life_delay -= 1
+        if life_delay == 0 and len(life_pts) == 0:
+            spawn_life_pt()
+    
+    for i, pt in enumerate(life_pts):
+        dist = math.sqrt((pt[0] - p_pos[0])**2 + (pt[1] - p_pos[1])**2)
+        if dist < life_rad:
+            p_life += 1
+            pts_remove.append(i)
+    
+    for i in sorted(pts_remove, reverse=True):
+        life_pts.pop(i)
+        life_delay = life_delay_time
+
+def spawn_inv_pt():
+    if len(inv_pts) < max_inv:
+        x = random.uniform(-grid_length + 150, grid_length - 150)
+        y = random.uniform(-grid_length + 150, grid_length - 150)
+        inv_pts.append([x, y, 0])
+
+def draw_inv_pt(x, y, z):
+    glPushMatrix()
+    glTranslatef(x, y, z + 25)
+    
+    pulse = 5 * math.sin(water_time * 0.15)
+    glTranslatef(0, 0, pulse)
+    
+    glRotatef(water_time * 4 % 360, 0, 0, 1)
+    glRotatef(water_time * 2 % 360, 1, 0, 0)
+    
+    glow = 0.4 * math.sin(water_time * 0.2)
+    glColor3f(0.5 + glow, 0.9 + glow*0.5, 1.0)
+    glutSolidSphere(20, 20, 20)
+    
+    glColor3f(0.8, 1.0, 1.0)
+    glutSolidTorus(3, 25, 12, 16)
+    
+    glRotatef(90, 1, 0, 0)
+    glColor3f(0.6, 0.95, 1.0)
+    glutSolidTorus(3, 25, 12, 16)
+    
+    for i in range(4):
+        glPushMatrix()
+        glRotatef(i * 90, 0, 0, 1)
+        glTranslatef(15, 0, 0)
+        glColor3f(0.9, 1.0, 1.0)
+        glutSolidCube(8)
+        glPopMatrix()
+    
+    glPopMatrix()
+
+def update_inv_pts():
+    global inv_pts, inv_delay, inv_active, inv_timer
+    pts_remove = []
+    
+    if inv_delay > 0:
+        inv_delay -= 1
+        if inv_delay == 0 and len(inv_pts) == 0:
+            spawn_inv_pt()
+    
+    for i, pt in enumerate(inv_pts):
+        dist = math.sqrt((pt[0] - p_pos[0])**2 + (pt[1] - p_pos[1])**2)
+        if dist < inv_rad:
+            inv_active = True
+            inv_timer = inv_duration
+            pts_remove.append(i)
+    
+    for i in sorted(pts_remove, reverse=True):
+        inv_pts.pop(i)
+        inv_delay = inv_delay_time
+    
+    if inv_active:
+        inv_timer -= 1
+        if inv_timer <= 0:
+            inv_active = False
+            inv_timer = 0
+# SHAKIB
+
+def check_oheat():
+    global fire_times, oheat, oheat_timer
+    if len(fire_times) >= 5:
+        time_diff = water_time - fire_times[0]
+        if time_diff <= oheat_threshold:
+            oheat = True
+            oheat_timer = oheat_duration
+            fire_times.clear()
+
+def update_oheat():
+    global oheat, oheat_timer, fire_times
+    if oheat:
+        oheat_timer -= 1
+        if oheat_timer <= 0:
+            oheat = False
+            oheat_timer = 0
+    
+    curr = water_time
+    fire_times = [t for t in fire_times if curr - t <= oheat_threshold]
+
+def draw_oheat_indicator():
+    if not oheat:
+        return
+    
+    remain = oheat_timer / float(oheat_duration)
+    pulse = 0.3 * math.sin(water_time * 0.2)
+    
+    glColor3f(1.0, 0.0 + pulse, 0.0)
+    draw_text(400, 500, "OVERHEATED!", GLUT_BITMAP_TIMES_ROMAN_24)
+    
+    bar_w = 200
+    bar_h = 20
+    bar_x = 400
+    bar_y = 460
+    
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    gluOrtho2D(0, 1000, 0, 800)
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+    
+    glColor3f(0.3, 0.0, 0.0)
+    glBegin(GL_QUADS)
+    glVertex2f(bar_x, bar_y)
+    glVertex2f(bar_x + bar_w, bar_y)
+    glVertex2f(bar_x + bar_w, bar_y + bar_h)
+    glVertex2f(bar_x, bar_y + bar_h)
+    glEnd()
+    
+    glColor3f(1.0, 0.2, 0.0)
+    glBegin(GL_QUADS)
+    glVertex2f(bar_x, bar_y)
+    glVertex2f(bar_x + bar_w * remain, bar_y)
+    glVertex2f(bar_x + bar_w * remain, bar_y + bar_h)
+    glVertex2f(bar_x, bar_y + bar_h)
+    glEnd()
+    
+    glColor3f(1.0, 1.0, 1.0)
+    glLineWidth(2)
+    glBegin(GL_LINE_LOOP)
+    glVertex2f(bar_x, bar_y)
+    glVertex2f(bar_x + bar_w, bar_y)
+    glVertex2f(bar_x + bar_w, bar_y + bar_h)
+    glVertex2f(bar_x, bar_y + bar_h)
+    glEnd()
+    
+    glPopMatrix()
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
+
+def update_fuel():
+    global fuel, fuel_delay
+    if fuel_delay > 0:
+        fuel_delay -= 1
+        return
+    
+    if not p_moving_forward and not p_moving_backward:
+        fuel += fuel_regen
+        if fuel > fuel_max:
+            fuel = fuel_max
+# SHAKIB
 
 def apply_difficulty():
     global enemy_speed, enemy_fire_rate, enemy_missile_speed
@@ -420,6 +699,11 @@ def respawn_enemy(index):
             break
 
 def draw_battleship():
+    # SHAKIB
+    if inv_active and (water_time % 10 < 5):
+        return
+    # SHAKIB
+    
     glPushMatrix()
     glTranslatef(p_pos[0], p_pos[1], p_pos[2])
     glRotatef(p_angle, 0, 0, 1)
@@ -693,12 +977,20 @@ def draw_boundaries():
     glEnd()
 
 def fire_missile():
+    # SHAKIB
+    if oheat:
+        return
+    # SHAKIB
     if not gameover:
         angle_rad = math.radians(p_angle)
         missile_x = p_pos[0] + 60 * math.cos(angle_rad)
         missile_y = p_pos[1] + 60 * math.sin(angle_rad)
         missile_z = p_pos[2]
         missiles.append([missile_x, missile_y, missile_z, p_angle])
+        # SHAKIB
+        fire_times.append(water_time)
+        check_oheat()
+        # SHAKIB
 
 def update_missiles():
     global missiles, missed, score, gameover
@@ -789,10 +1081,13 @@ def update_enemies():
             missile_z = enemy[2]
             enemy_missiles.append([missile_x, missile_y, missile_z, fire_angle])
         if distance < 50:
-            p_life -= 1
-            if p_life <= 0:
-                gameover = True
-                update_high_scores(score)
+            # SHAKIB
+            if not inv_active:
+                p_life -= 1
+                if p_life <= 0:
+                    gameover = True
+                    update_high_scores(score)
+            # SHAKIB
             respawn_enemy(enemies.index(enemy))
     if enemy_fire_cooldown >= enemy_fire_rate:
         enemy_fire_cooldown = 0
@@ -811,10 +1106,13 @@ def update_enemy_missiles():
         distance = math.sqrt((missile[0] - p_pos[0])**2 + (missile[1] - p_pos[1])**2)
         if distance < 40:
             missiles_to_remove.append(i)
-            p_life -= 1
-            if p_life <= 0:
-                gameover = True
-                update_high_scores(score)
+            # SHAKIB
+            if not inv_active:
+                p_life -= 1
+                if p_life <= 0:
+                    gameover = True
+                    update_high_scores(score)
+            # SHAKIB
     for i in sorted(missiles_to_remove, reverse=True):
         if i < len(enemy_missiles):
             enemy_missiles.pop(i)
@@ -862,7 +1160,10 @@ def update_cheat_mode():
 def keyboardListener(key,x,y):
     global p_moving_forward, p_moving_backward, cheat_mode, cheat_vision, gameover, p_life, score, missed, missiles, p_alive, p_angle
     global difficulty, max_mines, current_mines 
-    global wind_active, wind_radius 
+    global wind_active, wind_radius
+    # SHAKIB
+    global fire_times, oheat, oheat_timer, fuel, fuel_delay
+    # SHAKIB 
 
     if key==b'w' and not gameover:
         p_moving_forward = True
@@ -898,6 +1199,29 @@ def keyboardListener(key,x,y):
         current_mines = 0
         drones.clear()
         mines.clear()
+        # SHAKIB
+        bonus_pts.clear()
+        life_pts.clear()
+        inv_pts.clear()
+        bonus_delay = 0
+        life_delay = 0
+        inv_delay = 0
+        inv_active = False
+        inv_timer = 0
+        # SHAKIB
+        fire_times = []
+        oheat = False
+        oheat_timer = 0
+        fuel = 10.0
+        fuel_delay = 0
+        # SHAKIB
+        for i in range(max_bonus):
+            spawn_bonus_pt()
+        for i in range(max_life):
+            spawn_life_pt()
+        for i in range(max_inv):
+            spawn_inv_pt()
+        # SHAKIB
         apply_difficulty()
 
     if key == b'1' and not gameover:
@@ -934,23 +1258,43 @@ def keyboardUpListener(key, x, y):
         p_moving_backward=False
 
 def update_player_movement():
-    global p_pos
+    global p_pos, fuel, fuel_delay
     if gameover:
         return
     if p_moving_forward:
+        # SHAKIB
+        if fuel <= 0:
+            return
+        # SHAKIB
         angle_rad=math.radians(p_angle)
         new_x=p_pos[0]+15*math.cos(angle_rad)
         new_y=p_pos[1]+15*math.sin(angle_rad)
         if abs(new_x)<grid_length-50 and abs(new_y)<grid_length-50:
             p_pos[0]=new_x
             p_pos[1]=new_y
+            # SHAKIB
+            fuel -= fuel_consume
+            if fuel <= 0:
+                fuel = 0
+                fuel_delay = fuel_delay_time
+            # SHAKIB
     if p_moving_backward:
+        # SHAKIB
+        if fuel <= 0:
+            return
+        # SHAKIB
         angle_rad=math.radians(p_angle)
         new_x=p_pos[0]-15*math.cos(angle_rad)
         new_y=p_pos[1]-15*math.sin(angle_rad)
         if abs(new_x)<grid_length-50 and abs(new_y)<grid_length-50:
             p_pos[0]=new_x
             p_pos[1]= new_y
+            # SHAKIB
+            fuel -= fuel_consume
+            if fuel <= 0:
+                fuel = 0
+                fuel_delay = fuel_delay_time
+            # SHAKIB
 
 def specialKeyListener(key, x, y): # arrow keys
     global cam_angle, cam_height
@@ -1015,6 +1359,13 @@ def idle():
     update_cheat_mode()
     update_mines()
     update_drones()
+    # SHAKIB
+    update_bonus_pts()
+    update_life_pts()
+    update_inv_pts()
+    update_oheat()
+    update_fuel()
+    # SHAKIB
     glutPostRedisplay()
 
 def showScreen():
@@ -1042,12 +1393,26 @@ def showScreen():
     for drone in drones:
         draw_drone(drone[0], drone[1], drone[2])
    
+    # SHAKIB
+    for pt in bonus_pts:
+        draw_bonus_pt(pt[0], pt[1], pt[2])
+    
+    for pt in life_pts:
+        draw_life_pt(pt[0], pt[1], pt[2])
+    
+    for pt in inv_pts:
+        draw_inv_pt(pt[0], pt[1], pt[2])
+    # SHAKIB
+   
     draw_text(10,770,f"Life Remaining: {p_life}")
     draw_text(10,740,f"Ships Destroyed: {score}")
     draw_text(10,710,f"Missiles Missed: {missed}")
     draw_text(10,680,f"Mines Remaining: {max_mines - current_mines}")
     draw_text(10,650,f"Drones Remaining: {MAX_DRONES - len(drones)}")
-    draw_text(10, 620, f"Difficulty: {difficulty}")  
+    draw_text(10, 620, f"Difficulty: {difficulty}")
+    # SHAKIB
+    draw_text(10, 590, f"Fuel: {int(fuel)}")
+    # SHAKIB  
 
     if gameover:
         draw_text(350,400,"BATTLESHIP SUNK! Press R to Restart", GLUT_BITMAP_TIMES_ROMAN_24)
@@ -1057,7 +1422,10 @@ def showScreen():
             draw_text(350, y, f"{i+1}. {s}")
             y -= 25
     if cheat_mode:
-        draw_text(10,590,"AUTO-AIM ENGAGED")
+        draw_text(10,560,"AUTO-AIM ENGAGED")
+    # SHAKIB
+    draw_oheat_indicator()
+    # SHAKIB
     glutSwapBuffers()
 
 def main():
@@ -1070,6 +1438,14 @@ def main():
     glEnable(GL_DEPTH_TEST)
     apply_difficulty()
     initialize_enemies()
+    # SHAKIB
+    for i in range(max_bonus):
+        spawn_bonus_pt()
+    for i in range(max_life):
+        spawn_life_pt()
+    for i in range(max_inv):
+        spawn_inv_pt()
+    # SHAKIB
 
     glutDisplayFunc(showScreen)
     glutKeyboardFunc(keyboardListener)
