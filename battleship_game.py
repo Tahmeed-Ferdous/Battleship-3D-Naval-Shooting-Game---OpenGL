@@ -1171,9 +1171,9 @@ def keyboardListener(key,x,y):
     global fire_times, oheat, oheat_timer, fuel, fuel_delay
     # SHAKIB 
 
-    if key==b'w' and not gameover:
+    if key==b'w' and not gameover and not cheat_mode:
         p_moving_forward = True
-    if key==b's' and not gameover:
+    if key==b's' and not gameover and not cheat_mode:
         p_moving_backward = True
     if key==b'a' and not gameover and not cheat_mode:
         p_angle+=5
@@ -1181,12 +1181,14 @@ def keyboardListener(key,x,y):
         p_angle-=5
     # cheat mode
     if key == b'c' and not gameover:
+        # SHAKIB - Clear overheat when toggling cheat mode
+        oheat = False
+        oheat_timer = 0
+        fire_times = []
+        # SHAKIB
         cheat_mode=not cheat_mode
         # SHAKIB
         if cheat_mode:
-            oheat = False
-            oheat_timer = 0
-            fire_times = []
             fuel = fuel_max
             fuel_delay = 0
         # SHAKIB
