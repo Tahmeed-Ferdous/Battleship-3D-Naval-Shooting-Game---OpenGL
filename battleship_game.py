@@ -3,249 +3,223 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 import random
 import math
-cam_pos = [0, 500, 500]
-cam_angle = 0 
-cam_height = 500
-cam_mode= "third_person"
-p_pos =[0, 0, 0]
-p_angle = 0
-p_life = 5
-p_alive = True
-p_moving_forward = False
-p_moving_backward = False 
-
-score = 0
-missed = 0
-gameover = False
-
-missiles = []
-missile_speed = 10  #adjust here
-
-# Enemy missiles
-enemy_missiles = []
-enemy_fire_cooldown = 0
-
-# Enemy ships
-enemies = [] 
-enemy_size_factor = 1.0
-enemy_size_growing = True
-
-cheat_mode = False
-cheat_vision = False
-auto_rotation = 0
-
-fovY = 80
-grid_length = 600
-boundary_height = 100
-
-water_time = 0
-wave_amplitude = 3
-wave_frequency = 0.05
-
-HIGH_SCORE_FILE = "highscores.txt"
-TOP_N = 5
-high_scores = []
-
-difficulty = "MEDIUM"
-
-DIFFICULTY_SETTINGS = {
-    "EASY": {
-        "enemy_count": 3,
-        "enemy_speed": 0.06,
-        "enemy_fire_rate": 120,
-        "enemy_missile_speed": 2,
-        "max_missed": 15
+cam_pos=[0,500,500]
+cam_angle=0 
+cam_height=500
+cam_mode="third_person"
+p_pos=[0,0,0]
+p_angle=0
+p_life=5
+p_alive=True
+p_moving_forward=False
+p_moving_backward=False 
+score=0
+missed=0
+gameover=False
+missiles=[]
+missile_speed=10  
+enemy_missiles=[]
+enemy_fire_cooldown=0
+enemies=[] 
+enemy_size_factor=1.0
+enemy_size_growing=True
+cheat_mode=False
+cheat_vision=False
+auto_rotation=0
+fovY=80
+grid_length=600
+boundary_height=100
+water_time=0
+wave_amplitude=3
+wave_frequency=0.05
+HIGH_SCORE_FILE="highscores.txt"
+TOP_N=5
+high_scores=[]
+difficulty="MEDIUM"
+DIFFICULTY_SETTINGS={
+    "EASY":{
+        "enemy_count":3,
+        "enemy_speed":0.06,
+        "enemy_fire_rate":120,
+        "enemy_missile_speed":2,
+        "max_missed":15
     },
-    "MEDIUM": {
-        "enemy_count": 5,
-        "enemy_speed": 0.1,
-        "enemy_fire_rate": 80,
-        "enemy_missile_speed": 3,
-        "max_missed": 10
+    "MEDIUM":{
+        "enemy_count":5,
+        "enemy_speed":0.1,
+        "enemy_fire_rate":80,
+        "enemy_missile_speed":3,
+        "max_missed":10
     },
-    "HARD": {
-        "enemy_count": 8,
-        "enemy_speed": 0.18,
-        "enemy_fire_rate": 50,
-        "enemy_missile_speed": 4,
-        "max_missed": 6
+    "HARD":{
+        "enemy_count":8,
+        "enemy_speed":0.18,
+        "enemy_fire_rate":50,
+        "enemy_missile_speed":4,
+        "max_missed":6
     }
 }
 
-mines = []  
-mine_radius = 150  
-max_mines = 5
-current_mines = 0
-
-drones = [] 
-drone_speed = 8
-drone_radius = 25  
-MAX_DRONES = 1
-wind_active = False
-wind_radius = 0
-WIND_SPREAD_ANGLE = 60 
-WIND_PUSH_STRENGTH = 10
-
-WIND_MAX_RADIUS = 400  
-WIND_EXPAND_SPEED = 3.0  
-
-# SHAKIB
-bonus_pts = []
-life_pts = []
-max_bonus = 1
-max_life = 1
-bonus_rad = 30
-life_rad = 30
-bonus_delay = 0
-life_delay = 0
-bonus_delay_time = 300
-life_delay_time = 300
-inv_pts = []
-max_inv = 1
-inv_rad = 30
-inv_delay = 0
-inv_delay_time = 1200
-inv_active = False
-inv_timer = 0
-inv_duration = 280
-# SHAKIB
-fire_times = []
-oheat = False
-oheat_timer = 0
-oheat_duration = 180
-oheat_threshold = 180
-fuel = 10.0
-fuel_max = 10.0
-fuel_consume = 0.5
-fuel_regen = 0.10
-fuel_delay = 0
-fuel_delay_time = 120
-# SHAKIB
-
+mines=[]  
+mine_radius=150  
+max_mines=5
+current_mines=0
+drones=[] 
+drone_speed=8
+drone_radius=25  
+MAX_DRONES=1
+wind_active=False
+wind_radius=0
+WIND_SPREAD_ANGLE=60 
+WIND_PUSH_STRENGTH=10
+WIND_MAX_RADIUS=400  
+WIND_EXPAND_SPEED=3.0  
+bonus_pts=[]
+life_pts=[]
+max_bonus=1
+max_life=1
+bonus_rad=30
+life_rad=30
+bonus_delay=0
+life_delay=0
+bonus_delay_time=300
+life_delay_time=300
+inv_pts=[]
+max_inv=1
+inv_rad=30
+inv_delay=0
+inv_delay_time=1200
+inv_active=False
+inv_timer=0
+inv_duration=280
+fire_times=[]
+oheat=False
+oheat_timer=0
+oheat_duration=180
+oheat_threshold=180
+fuel=10.0
+fuel_max=10.0
+fuel_consume=0.5
+fuel_regen=0.10
+fuel_delay=0
+fuel_delay_time=120
 def draw_wind():
-    global wind_radius, wind_active
-
+    global wind_radius,wind_active
     if not wind_active:
         return
-
     glPushMatrix()
-    glTranslatef(p_pos[0], p_pos[1], p_pos[2] + 15)
-    glRotatef(p_angle, 0, 0, 1)
-
-    segments = 120
-    arc_angle = WIND_SPREAD_ANGLE
-    trail_count = 60  
-    ease_factor = 1 - (wind_radius / WIND_MAX_RADIUS)
-    current_speed = WIND_EXPAND_SPEED * (0.5 + 0.5 * ease_factor)
+    glTranslatef(p_pos[0],p_pos[1],p_pos[2]+15)
+    glRotatef(p_angle,0,0,1)
+    segments=120
+    arc_angle=WIND_SPREAD_ANGLE
+    trail_count=60  
+    ease_factor=1-(wind_radius/WIND_MAX_RADIUS)
+    current_speed=WIND_EXPAND_SPEED*(0.5+0.5*ease_factor)
     for layer in range(3):
-        layer_radius = wind_radius - layer * 4
-        layer_opacity = max(0.0, 0.5 * (1 - layer / 3) * (1 - wind_radius / WIND_MAX_RADIUS))
+        layer_radius=wind_radius-layer*4
+        layer_opacity=max(0.0,0.5*(1-layer/3)*(1-wind_radius/WIND_MAX_RADIUS))
         glLineWidth(1.5)
         glBegin(GL_LINE_STRIP)
-        for i in range(segments + 1):
-            angle = math.radians(-arc_angle / 2 + i * (arc_angle / segments))
-            twist = 2 * math.sin(i * 8 + water_time * 0.3 + layer)
-            x = (layer_radius + twist) * math.cos(angle)
-            y = (layer_radius + twist) * math.sin(angle)
-            z = 4 * math.sin(i / segments * math.pi + water_time * 0.2) + layer * 1.2
-            glColor4f(0.75 + 0.05 * layer, 0.8 + 0.05 * layer, 1.0, layer_opacity)
-            glVertex3f(x, y, z)
+        for i in range(segments+1):
+            angle=math.radians(-arc_angle/2+i*(arc_angle/segments))
+            twist=2*math.sin(i*8+water_time*0.3+layer)
+            x=(layer_radius+twist)*math.cos(angle)
+            y=(layer_radius+twist)*math.sin(angle)
+            z=4*math.sin(i/segments*math.pi+water_time*0.2)+layer*1.2
+            glColor4f(0.75+0.05*layer,0.8+0.05*layer,1.0,layer_opacity)
+            glVertex3f(x,y,z)
         glEnd()
     for _ in range(trail_count):
-        angle_offset = math.radians(random.uniform(-arc_angle / 2, arc_angle / 2))
-        radius_offset = random.uniform(max(0, wind_radius - 80), wind_radius)
-        z_offset = random.uniform(0, 8)
-        length = random.uniform(30, 60)
-        glColor4f(0.8, 0.85, 1.0, 0.2)
+        angle_offset=math.radians(random.uniform(-arc_angle/2,arc_angle/2))
+        radius_offset=random.uniform(max(0,wind_radius-80),wind_radius)
+        z_offset=random.uniform(0,8)
+        length=random.uniform(30,60)
+        glColor4f(0.8,0.85,1.0,0.2)
         glBegin(GL_LINES)
-        glVertex3f(radius_offset * math.cos(angle_offset),
-                   radius_offset * math.sin(angle_offset),
+        glVertex3f(radius_offset*math.cos(angle_offset),
+                   radius_offset*math.sin(angle_offset),
                    z_offset)
-        glVertex3f((radius_offset - length) * math.cos(angle_offset),
-                   (radius_offset - length) * math.sin(angle_offset),
-                   z_offset + random.uniform(0, 5))
+        glVertex3f((radius_offset-length)*math.cos(angle_offset),
+                   (radius_offset-length)*math.sin(angle_offset),
+                   z_offset+random.uniform(0,5))
         glEnd()
     for layer in range(2):
-        offset_radius = wind_radius - 8 - layer * 4
+        offset_radius=wind_radius-8-layer*4
         glLineWidth(1.0)
         glBegin(GL_LINE_STRIP)
-        for i in range(segments + 1):
-            angle = math.radians(-arc_angle / 2 + i * (arc_angle / segments))
-            x = (offset_radius + 2 * math.sin(i * 6 + water_time * 0.25)) * math.cos(angle)
-            y = (offset_radius + 2 * math.sin(i * 6 + water_time * 0.25)) * math.sin(angle)
-            z = 1.5 * layer + 2 * math.sin(i / segments * math.pi + water_time * 0.15)
-            opacity = max(0.0, 0.25 * (1 - wind_radius / WIND_MAX_RADIUS))
-            glColor4f(0.7, 0.75, 1.0, opacity)
-            glVertex3f(x, y, z)
+        for i in range(segments+1):
+            angle=math.radians(-arc_angle/2+i*(arc_angle/segments))
+            x=(offset_radius+2*math.sin(i*6+water_time*0.25))*math.cos(angle)
+            y=(offset_radius+2*math.sin(i*6+water_time*0.25))*math.sin(angle)
+            z=1.5*layer+2*math.sin(i/segments*math.pi+water_time*0.15)
+            opacity=max(0.0,0.25*(1-wind_radius/WIND_MAX_RADIUS))
+            glColor4f(0.7,0.75,1.0,opacity)
+            glVertex3f(x,y,z)
         glEnd()
-
     glPopMatrix()
-    wind_radius += current_speed
-    if wind_radius > WIND_MAX_RADIUS:
-        wind_active = False
-        wind_radius = 0
-
+    wind_radius+=current_speed
+    if wind_radius>WIND_MAX_RADIUS:
+        wind_active=False
+        wind_radius=0
 def spawn_drone():
     global drones
     if gameover:
         return
-    angle_rad = math.radians(p_angle)
-    drone_x = p_pos[0] + 50 * math.cos(angle_rad)  
-    drone_y = p_pos[1] + 50 * math.sin(angle_rad)
-    drone_z = p_pos[2] + 10  
-    if len(drones) < MAX_DRONES:
-        drones.append([drone_x, drone_y, drone_z])
-
+    angle_rad=math.radians(p_angle)
+    drone_x=p_pos[0]+50*math.cos(angle_rad)  
+    drone_y=p_pos[1]+50*math.sin(angle_rad)
+    drone_z=p_pos[2]+10  
+    if len(drones)<MAX_DRONES:
+        drones.append([drone_x,drone_y,drone_z])
 def update_drones():
-    global drones, score
-    drones_to_remove = []
-    for i, drone in enumerate(drones):
+    global drones,score
+    drones_to_remove=[]
+    for i,drone in enumerate(drones):
         if not enemies:
             continue
-        nearest_enemy = min(enemies, key=lambda e: math.sqrt((e[0]-drone[0])**2 + (e[1]-drone[1])**2))
-        dx = nearest_enemy[0] - drone[0]
-        dy = nearest_enemy[1] - drone[1]
-        distance = math.sqrt(dx**2 + dy**2)
-        if distance > 0:
-            drone[0] += (dx / distance) * drone_speed
-            drone[1] += (dy / distance) * drone_speed
-        if distance < drone_radius:
-            score += 1
+        nearest_enemy=min(enemies,key=lambda e:math.sqrt((e[0]-drone[0])**2+(e[1]-drone[1])**2))
+        dx=nearest_enemy[0]-drone[0]
+        dy=nearest_enemy[1]-drone[1]
+        distance=math.sqrt(dx**2+dy**2)
+        if distance>0:
+            drone[0]+=(dx/distance)*drone_speed
+            drone[1]+=(dy/distance)*drone_speed
+        if distance<drone_radius:
+            score+=1
             respawn_enemy(enemies.index(nearest_enemy))
             drones_to_remove.append(i)
-    for i in sorted(drones_to_remove, reverse=True):
+    for i in sorted(drones_to_remove,reverse=True):
         drones.pop(i)
-
-def draw_drone(x, y, z, rotation_angle=0, time=0):
+def draw_drone(x,y,z,rotation_angle=0,time=0):
     glPushMatrix()
-    glTranslatef(x, y, z)
-    quad = gluNewQuadric()
+    glTranslatef(x,y,z)
+    quad=gluNewQuadric()
     glPushMatrix()
-    glow = 0.05 * math.sin(time * 0.3)
-    glColor3f(0.9 + glow, 0.85 + glow, 0.2) 
-    glutSolidSphere(10, 20, 20)
+    glow=0.05*math.sin(time*0.3)
+    glColor3f(0.9+glow,0.85+glow,0.2) 
+    glutSolidSphere(10,20,20)
     glPopMatrix()
     glPushMatrix()
-    glTranslatef(0, 0, 10)
-    glColor3f(0.75, 0.75, 0.75)  
-    glRotatef(-90, 1, 0, 0)
-    gluCylinder(quad, 5, 0, 10, 12, 1)
+    glTranslatef(0,0,10)
+    glColor3f(0.75,0.75,0.75)  
+    glRotatef(-90,1,0,0)
+    gluCylinder(quad,5,0,10,12,1)
     glPopMatrix()
     glPushMatrix()
-    glTranslatef(0, -4, 6)
-    glow = 0.4 + 0.4 * math.sin(time * 0.4)
-    glColor3f(0.2, 0.8 + glow*0.2, 0.9)
-    glutSolidSphere(3, 10, 10)
-    glTranslatef(0, 0, -2)
-    glColor3f(0.15, 0.15, 0.15)
-    gluCylinder(quad, 0.5, 0.5, 4, 8, 1)
+    glTranslatef(0,-4,6)
+    glow=0.4+0.4*math.sin(time*0.4)
+    glColor3f(0.2,0.8+glow*0.2,0.9)
+    glutSolidSphere(3,10,10)
+    glTranslatef(0,0,-2)
+    glColor3f(0.15,0.15,0.15)
+    gluCylinder(quad,0.5,0.5,4,8,1)
     glPopMatrix()
-    for angle in [20, -20]:
+    for angle in [20,-20]:
         glPushMatrix()
-        glTranslatef(0, 0, -12)
-        glRotatef(angle, 1, 0, 0)
-        glColor3f(0.7, 0.7, 0.7)
-        glScalef(0.5, 0.5, 1.5)
+        glTranslatef(0,0,-12)
+        glRotatef(angle,1,0,0)
+        glColor3f(0.7,0.7,0.7)
+        glScalef(0.5,0.5,1.5)
         glutSolidCube(8)
         glPopMatrix()
     for angle in [45,-45]:
