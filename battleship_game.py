@@ -21,8 +21,8 @@ missile_speed=10
 enemy_missiles=[]
 enemy_fire_cooldown=0
 enemies=[] 
-enemy_size_factor=1.0
-enemy_size_growing=True
+en_size_factor=1.0
+en_size_growing=True
 cheat_mode=False
 cheat_vision=False
 auto_rotation=0
@@ -707,35 +707,35 @@ def draw_enemy_ship(x,y,z):
     glPushMatrix()
     glTranslatef(0,0,10)
     glColor3f(0.8,0.1,0.1)
-    glScalef(1.5*enemy_size_factor,0.6*enemy_size_factor,0.4*enemy_size_factor)
+    glScalef(1.5*en_size_factor,0.6*en_size_factor,0.4*en_size_factor)
     glutSolidCube(35)
     glPopMatrix()
     glPushMatrix()
     glTranslatef(0,0,22)
     glColor3f(0.6,0.1,0.1)
-    glScalef(1.0*enemy_size_factor,0.4*enemy_size_factor,0.3*enemy_size_factor)
+    glScalef(1.0*en_size_factor,0.4*en_size_factor,0.3*en_size_factor)
     glutSolidCube(30)
     glPopMatrix()
     glPushMatrix()
     glTranslatef(0,0,32)
     glColor3f(0.4,0.1,0.1)
-    gluSphere(gluNewQuadric(),12*enemy_size_factor,10,10)
+    gluSphere(gluNewQuadric(),12*en_size_factor,10,10)
     glPopMatrix()
     glPushMatrix()
-    glTranslatef(10*enemy_size_factor,0,25)
+    glTranslatef(10*en_size_factor,0,25)
     glColor3f(0.3,0.1,0.1)
-    gluCylinder(gluNewQuadric(),8*enemy_size_factor,8*enemy_size_factor,10*enemy_size_factor,10,1)
+    gluCylinder(gluNewQuadric(),8*en_size_factor,8*en_size_factor,10*en_size_factor,10,1)
     glPopMatrix()
     
     glPushMatrix()
-    glTranslatef(-10*enemy_size_factor,0,28)
+    glTranslatef(-10*en_size_factor,0,28)
     glColor3f(0.2,0.2,0.2)
-    gluCylinder(gluNewQuadric(),4*enemy_size_factor,3*enemy_size_factor,15*enemy_size_factor,8,1)
+    gluCylinder(gluNewQuadric(),4*en_size_factor,3*en_size_factor,15*en_size_factor,8,1)
     glPopMatrix()
     glPushMatrix()
-    glTranslatef(-10*enemy_size_factor,0,45*enemy_size_factor)
+    glTranslatef(-10*en_size_factor,0,45*en_size_factor)
     glColor3f(0.5,0.5,0.5)
-    gluSphere(gluNewQuadric(),5*enemy_size_factor,6,6)
+    gluSphere(gluNewQuadric(),5*en_size_factor,6,6)
     glPopMatrix()
     glPopMatrix()
 def draw_missile(x,y,z):
@@ -878,7 +878,7 @@ def update_missiles():
         if i<len(missiles):
             missiles.pop(i)
 def update_enemies():
-    global p_life,gameover,enemy_size_factor,enemy_size_growing,enemy_fire_cooldown
+    global p_life,gameover,en_size_factor,en_size_growing,enemy_fire_cooldown
     global wind_active,wind_radius
     if wind_active:
         wind_radius+=10 
@@ -899,14 +899,14 @@ def update_enemies():
             wind_active=False  
     if gameover:
         return
-    if enemy_size_growing:
-        enemy_size_factor+=0.01
-        if enemy_size_factor>=1.2:
-            enemy_size_growing=False
+    if en_size_growing:
+        en_size_factor+=0.01
+        if en_size_factor>=1.2:
+            en_size_growing=False
     else:
-        enemy_size_factor-=0.01
-        if enemy_size_factor<=0.8:
-            enemy_size_growing=True
+        en_size_factor-=0.01
+        if en_size_factor<=0.8:
+            en_size_growing=True
     enemy_fire_cooldown+=1
     for enemy in enemies:
         dx = p_pos[0] - enemy[0]
