@@ -986,7 +986,7 @@ def keyboardListener(key,x,y):
     global difficulty,max_mines,current_mines 
     global wind_active,wind_radius
     global fire_times,oheat,oheat_timer,fuel,fuel_delay
-
+    global inv_active,inv_timer,inv_pts,inv_delay,bonus_pts,life_pts,bonus_delay,life_delay,p_pos,mines,drones,enemy_missiles
     if key==b'w' and not gameover and not cheat_mode:
         p_moving_forward = True
     if key==b's' and not gameover and not cheat_mode:
@@ -1037,7 +1037,6 @@ def keyboardListener(key,x,y):
         oheat_timer=0
         fuel=10.0
         fuel_delay=0
-        
         for i in range(max_bonus):
             spawn_bonus_pt()
         for i in range(max_life):
