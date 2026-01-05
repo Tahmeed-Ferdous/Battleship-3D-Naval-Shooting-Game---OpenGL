@@ -248,331 +248,273 @@ def draw_drone(x, y, z, rotation_angle=0, time=0):
         glScalef(0.5, 0.5, 1.5)
         glutSolidCube(8)
         glPopMatrix()
-    for angle in [45, -45]:
+    for angle in [45,-45]:
         glPushMatrix()
-        glRotatef(angle, 0, 0, 1)
-        glTranslatef(7, 0, -3)
-        glColor3f(0.6, 0.6, 0.6)
-        glScalef(0.3, 1.5, 0.5)
+        glRotatef(angle,0,0,1)
+        glTranslatef(7,0,-3)
+        glColor3f(0.6,0.6,0.6)
+        glScalef(0.3,1.5,0.5)
         glutSolidCube(6)
         glPopMatrix()
-    for angle in [0, 90, 180, 270]:
+    for angle in [0,90,180,270]:
         glPushMatrix()
-        glRotatef(angle, 0, 0, 1)
-        glTranslatef(12, 0, 0)
-        glColor3f(0.25, 0.25, 0.25)
-        gluCylinder(quad, 1, 1, 12, 8, 1)
-
-        glTranslatef(12, 0, 0)
-        glRotatef(rotation_angle, 1, 0, 0)
-        glColor3f(0.1, 0.1, 0.1)
-        glutSolidSphere(1.5, 10, 10)
-        for blade_angle in [0, 45, 90, 135]:
+        glRotatef(angle,0,0,1)
+        glTranslatef(12,0,0)
+        glColor3f(0.25,0.25,0.25)
+        gluCylinder(quad,1,1,12,8,1)
+        glTranslatef(12,0,0)
+        glRotatef(rotation_angle,1,0,0)
+        glColor3f(0.1,0.1,0.1)
+        glutSolidSphere(1.5,10,10)
+        for blade_angle in [0,45,90,135]:
             glPushMatrix()
-            glRotatef(blade_angle, 0, 0, 1)
-            glTranslatef(2, 0, 0)
-            glScalef(1, 0.1, 0.1)
-            glColor3f(0.15, 0.15, 0.15)
+            glRotatef(blade_angle,0,0,1)
+            glTranslatef(2,0,0)
+            glScalef(1,0.1,0.1)
+            glColor3f(0.15,0.15,0.15)
             glutSolidCube(4)
             glPopMatrix()
         glPushMatrix()
-        glTranslatef(2, 0, 0)
-        if angle % 180 == 0:
-            glColor3f(1.0, 0.2, 0.2)  
+        glTranslatef(2,0,0)
+        if angle%180==0:
+            glColor3f(1.0,0.2,0.2)  
         else:
-            glColor3f(0.2, 1.0, 0.2)
-        glutSolidSphere(1.2, 8, 8)
+            glColor3f(0.2,1.0,0.2)
+        glutSolidSphere(1.2,8,8)
         glPopMatrix()
         glPopMatrix()
-    for side in [-1, 1]:
+    for side in [-1,1]:
         glPushMatrix()
-        glTranslatef(side * 4, -2, -10)
-        glColor3f(0.2, 0.2, 0.2)
-        gluCylinder(quad, 0.8, 0.8, 5, 8, 1)
+        glTranslatef(side*4,-2,-10)
+        glColor3f(0.2,0.2,0.2)
+        gluCylinder(quad,0.8,0.8,5,8,1)
         glPopMatrix()
     glPopMatrix()
-
 def drop_mine():
-    global mines, current_mines  
-    if not gameover and current_mines < max_mines:
+    global mines,current_mines  
+    if not gameover and current_mines<max_mines:
         angle_rad = math.radians(p_angle)
-        mine_x = p_pos[0] + 50 * math.cos(angle_rad)
-        mine_y = p_pos[1] + 50 * math.sin(angle_rad)
-        mine_z = p_pos[2]
-        mines.append([mine_x, mine_y, mine_z])
-        current_mines += 1 
-
+        mine_x=p_pos[0]+50*math.cos(angle_rad)
+        mine_y=p_pos[1]+50*math.sin(angle_rad)
+        mine_z=p_pos[2]
+        mines.append([mine_x,mine_y,mine_z])
+        current_mines+=1 
 def update_mines():
-    global mines, score, current_mines  
-    mines_to_remove = []
-
-    for i, mine in enumerate(mines):
-        mx, my, mz = mine
-        for j, enemy in enumerate(enemies):
-            ex, ey, ez = enemy
-            distance = math.sqrt((mx - ex)**2 + (my - ey)**2)
-            if distance < mine_radius:
-                score += 1
+    global mines,score,current_mines  
+    mines_to_remove=[]
+    for i,mine in enumerate(mines):
+        mx,my,mz=mine
+        for j,enemy in enumerate(enemies):
+            ex,ey,ez=enemy
+            distance=math.sqrt((mx-ex)**2+(my-ey)**2)
+            if distance<mine_radius:
+                score+=1
                 respawn_enemy(j)
                 mines_to_remove.append(i)  
                 break
-
-    for i in sorted(mines_to_remove, reverse=True):
-        if i < len(mines):
+    for i in sorted(mines_to_remove,reverse=True):
+        if i<len(mines):
             mines.pop(i)
-            current_mines -= 1 
-
-
-def draw_mine(x, y, z):
+            current_mines-=1
+def draw_mine(x,y,z):
     glPushMatrix()
-
-    hover = 10 + math.sin(water_time * 0.1) * 3
-    glTranslatef(x, y, z + hover)
-    glRotatef(water_time * 2 % 360, 0, 0, 1)
-
-    glow_factor = 0.05 * math.sin(water_time * 0.3)
-    glColor3f(0.1 + glow_factor, 0.1 + glow_factor, 0.1 + glow_factor)
-    glutSolidSphere(15, 30, 30)
-
+    hover=10+math.sin(water_time*0.1)*3
+    glTranslatef(x,y,z+hover)
+    glRotatef(water_time*2%360,0,0,1)
+    glow_factor=0.05*math.sin(water_time*0.3)
+    glColor3f(0.1+glow_factor,0.1+glow_factor,0.1+glow_factor)
+    glutSolidSphere(15,30,30)
     glPushMatrix()
-    glColor3f(0.25, 0.25, 0.25)
-    glRotatef(90, 1, 0, 0)
-    gluCylinder(gluNewQuadric(), 10.5, 10.5, 2, 20, 1)
+    glColor3f(0.25,0.25,0.25)
+    glRotatef(90,1,0,0)
+    gluCylinder(gluNewQuadric(),10.5,10.5,2,20,1)
     glPopMatrix()
-
-    spike_length = 12
-    spike_tip_length = 4
-
-    glColor3f(0.1, 0.1, 0.1)
-    quad = gluNewQuadric()
-
+    spike_length=12
+    spike_tip_length=4
+    glColor3f(0.1,0.1,0.1)
+    quad=gluNewQuadric()
     glPushMatrix()
-    glTranslatef(0, 0, 15)
-    glRotatef(-90, 1, 0, 0)
-    gluCylinder(quad, 2, 0, spike_length, 8, 2)  
-    glTranslatef(0, 0, spike_length)
-    glColor3f(1.0, 0.2 + 0.3*math.sin(water_time*0.2), 0.2)
-    gluCylinder(quad, 1.5, 0, spike_tip_length, 8, 2)
+    glTranslatef(0,0,15)
+    glRotatef(-90,1,0,0)
+    gluCylinder(quad,2,0,spike_length,8,2)  
+    glTranslatef(0,0,spike_length)
+    glColor3f(1.0,0.2+0.3*math.sin(water_time*0.2),0.2)
+    gluCylinder(quad,1.5,0,spike_tip_length,8,2)
     glPopMatrix()
-
     glPushMatrix()
-    glTranslatef(0, 0, -15)
-    glRotatef(90, 1, 0, 0)
-    gluCylinder(quad, 2, 0, spike_length, 8, 2)
-    glTranslatef(0, 0, spike_length)
-    glColor3f(1.0, 0.2 + 0.3*math.sin(water_time*0.2), 0.2)
-    gluCylinder(quad, 1.5, 0, spike_tip_length, 8, 2)
+    glTranslatef(0,0,-15)
+    glRotatef(90,1,0,0)
+    gluCylinder(quad,2,0,spike_length,8,2)
+    glTranslatef(0,0,spike_length)
+    glColor3f(1.0,0.2+0.3*math.sin(water_time*0.2),0.2)
+    gluCylinder(quad,1.5,0,spike_tip_length,8,2)
     glPopMatrix()
-
-    for angle in [0, 90, 180, 270]:
+    for angle in [0,90,180,270]:
         glPushMatrix()
-        glRotatef(angle + water_time, 0, 0, 1)
-        glTranslatef(15, 0, 0)
-        glRotatef(90, 0, 1, 0)
-        glColor3f(0.1, 0.1, 0.1)
-        gluCylinder(quad, 2, 0, spike_length, 8, 2)
-        glTranslatef(0, 0, spike_length)
-        glColor3f(1.0, 0.2 + 0.3*math.sin(water_time*0.2), 0.2)
-        gluCylinder(quad, 1.5, 0, spike_tip_length, 8, 2)
+        glRotatef(angle+water_time,0,0,1)
+        glTranslatef(15,0,0)
+        glRotatef(90,0,1,0)
+        glColor3f(0.1,0.1,0.1)
+        gluCylinder(quad,2,0,spike_length,8,2)
+        glTranslatef(0,0,spike_length)
+        glColor3f(1.0,0.2+0.3*math.sin(water_time*0.2),0.2)
+        gluCylinder(quad,1.5,0,spike_tip_length,8,2)
         glPopMatrix()
-
     glPopMatrix()
-
 # SHAKIB
 def spawn_bonus_pt():
-    if len(bonus_pts) < max_bonus:
-        x = random.uniform(-grid_length + 150, grid_length - 150)
-        y = random.uniform(-grid_length + 150, grid_length - 150)
-        bonus_pts.append([x, y, 0])
-
+    if len(bonus_pts)<max_bonus:
+        x=random.uniform(-grid_length+150,grid_length-150)
+        y=random.uniform(-grid_length+150,grid_length-150)
+        bonus_pts.append([x,y,0])
 def spawn_life_pt():
-    if len(life_pts) < max_life:
-        x = random.uniform(-grid_length + 150, grid_length - 150)
-        y = random.uniform(-grid_length + 150, grid_length - 150)
-        life_pts.append([x, y, 0])
-
-def draw_bonus_pt(x, y, z):
+    if len(life_pts)<max_life:
+        x=random.uniform(-grid_length+150,grid_length-150)
+        y=random.uniform(-grid_length+150,grid_length-150)
+        life_pts.append([x,y,0])
+def draw_bonus_pt(x,y,z):
     glPushMatrix()
-    glTranslatef(x, y, z + 20)
-    
-    rot = water_time * 3 % 360
-    glRotatef(rot, 0, 0, 1)
-    
-    glow = 0.2 * math.sin(water_time * 0.1)
-    glColor3f(1.0, 0.8 + glow, 0.0)
+    glTranslatef(x,y,z+20)
+    rot=water_time*3%360
+    glRotatef(rot,0,0,1)
+    glow=0.2*math.sin(water_time*0.1)
+    glColor3f(1.0,0.8+glow,0.0)
     glutSolidCube(25)
-    
-    glRotatef(45, 0, 0, 1)
-    glColor3f(1.0, 0.9, 0.2)
+    glRotatef(45,0,0,1)
+    glColor3f(1.0,0.9,0.2)
     glutSolidCube(20)
-    
-    glColor3f(1.0, 1.0, 0.5)
-    gluSphere(gluNewQuadric(), 15, 10, 10)
-    
+    glColor3f(1.0,1.0,0.5)
+    gluSphere(gluNewQuadric(),15,10,10)
     glPopMatrix()
-
-def draw_life_pt(x, y, z):
+def draw_life_pt(x,y,z):
     glPushMatrix()
-    glTranslatef(x, y, z + 20)
-    
-    bob = 5 * math.sin(water_time * 0.08)
-    glTranslatef(0, 0, bob)
-    
-    glRotatef(water_time * 2 % 360, 0, 0, 1)
-    
-    glow = 0.3 * math.sin(water_time * 0.12)
-    glColor3f(1.0, 0.1 + glow, 0.1 + glow)
-    glutSolidSphere(18, 15, 15)
-    
-    for ang in [0, 90, 180, 270]:
+    glTranslatef(x,y,z+20)
+    bob=5*math.sin(water_time*0.08)
+    glTranslatef(0,0,bob)
+    glRotatef(water_time*2%360,0,0,1)
+    glow=0.3*math.sin(water_time*0.12)
+    glColor3f(1.0,0.1+glow,0.1+glow)
+    glutSolidSphere(18,15,15)
+    for ang in [0,90,180,270]:
         glPushMatrix()
-        glRotatef(ang, 0, 0, 1)
-        glTranslatef(12, 0, 0)
-        glColor3f(0.9, 0.0, 0.0)
+        glRotatef(ang,0,0,1)
+        glTranslatef(12,0,0)
+        glColor3f(0.9,0.0,0.0)
         glutSolidCube(10)
         glPopMatrix()
-    
-    glColor3f(1.0, 0.5, 0.5)
-    glRotatef(45, 1, 0, 0)
-    glutSolidTorus(3, 10, 8, 12)
-    
+    glColor3f(1.0,0.5,0.5)
+    glRotatef(45,1,0,0)
+    glutSolidTorus(3,10,8,12)
     glPopMatrix()
-
 def update_bonus_pts():
-    global bonus_pts, score, bonus_delay
-    pts_remove = []
-    
-    if bonus_delay > 0:
-        bonus_delay -= 1
-        if bonus_delay == 0 and len(bonus_pts) == 0:
+    global bonus_pts,score,bonus_delay
+    pts_remove=[]
+    if bonus_delay>0:
+        bonus_delay-=1
+        if bonus_delay==0 and len(bonus_pts)==0:
             spawn_bonus_pt()
-    
-    for i, pt in enumerate(bonus_pts):
-        dist = math.sqrt((pt[0] - p_pos[0])**2 + (pt[1] - p_pos[1])**2)
-        if dist < bonus_rad:
-            score += 1
+    for i,pt in enumerate(bonus_pts):
+        dist=math.sqrt((pt[0]-p_pos[0])**2+(pt[1]-p_pos[1])**2)
+        if dist<bonus_rad:
+            score+=1
             pts_remove.append(i)
-    
-    for i in sorted(pts_remove, reverse=True):
+    for i in sorted(pts_remove,reverse=True):
         bonus_pts.pop(i)
-        bonus_delay = bonus_delay_time
-
+        bonus_delay=bonus_delay_time
 def update_life_pts():
-    global life_pts, p_life, life_delay
-    pts_remove = []
-    
-    if life_delay > 0:
-        life_delay -= 1
-        if life_delay == 0 and len(life_pts) == 0:
+    global life_pts,p_life,life_delay
+    pts_remove=[]
+    if life_delay>0:
+        life_delay-=1
+        if life_delay==0 and len(life_pts)==0:
             spawn_life_pt()
-    
-    for i, pt in enumerate(life_pts):
-        dist = math.sqrt((pt[0] - p_pos[0])**2 + (pt[1] - p_pos[1])**2)
-        if dist < life_rad:
-            p_life += 1
+    for i,pt in enumerate(life_pts):
+        dist=math.sqrt((pt[0]-p_pos[0])**2+(pt[1]-p_pos[1])**2)
+        if dist<life_rad:
+            p_life+=1
             pts_remove.append(i)
-    
-    for i in sorted(pts_remove, reverse=True):
+    for i in sorted(pts_remove,reverse=True):
         life_pts.pop(i)
-        life_delay = life_delay_time
-
+        life_delay=life_delay_time
 def spawn_inv_pt():
-    if len(inv_pts) < max_inv:
-        x = random.uniform(-grid_length + 150, grid_length - 150)
-        y = random.uniform(-grid_length + 150, grid_length - 150)
-        inv_pts.append([x, y, 0])
-
-def draw_inv_pt(x, y, z):
+    if len(inv_pts)<max_inv:
+        x=random.uniform(-grid_length+150,grid_length-150)
+        y=random.uniform(-grid_length+150,grid_length-150)
+        inv_pts.append([x,y,0])
+def draw_inv_pt(x,y,z):
     glPushMatrix()
-    glTranslatef(x, y, z + 25)
-    
-    pulse = 5 * math.sin(water_time * 0.15)
-    glTranslatef(0, 0, pulse)
-    
-    glRotatef(water_time * 4 % 360, 0, 0, 1)
-    glRotatef(water_time * 2 % 360, 1, 0, 0)
-    
-    glow = 0.4 * math.sin(water_time * 0.2)
-    glColor3f(0.5 + glow, 0.9 + glow*0.5, 1.0)
-    glutSolidSphere(20, 20, 20)
-    
-    glColor3f(0.8, 1.0, 1.0)
-    glutSolidTorus(3, 25, 12, 16)
-    
-    glRotatef(90, 1, 0, 0)
-    glColor3f(0.6, 0.95, 1.0)
-    glutSolidTorus(3, 25, 12, 16)
-    
+    glTranslatef(x,y,z+25)
+    pulse=5*math.sin(water_time*0.15)
+    glTranslatef(0,0,pulse)
+    glRotatef(water_time*4%360,0,0,1)
+    glRotatef(water_time*2%360,1,0,0)
+    glow=0.4*math.sin(water_time*0.2)
+    glColor3f(0.5+glow,0.9+glow*0.5,1.0)
+    glutSolidSphere(20,20,20)
+    glColor3f(0.8,1.0,1.0)
+    glutSolidTorus(3,25,12,16)
+    glRotatef(90,1,0,0)
+    glColor3f(0.6,0.95,1.0)
+    glutSolidTorus(3,25,12,16)
     for i in range(4):
         glPushMatrix()
-        glRotatef(i * 90, 0, 0, 1)
-        glTranslatef(15, 0, 0)
-        glColor3f(0.9, 1.0, 1.0)
+        glRotatef(i*90,0,0, 1)
+        glTranslatef(15,0,0)
+        glColor3f(0.9,1.0,1.0)
         glutSolidCube(8)
         glPopMatrix()
-    
     glPopMatrix()
-
 def update_inv_pts():
-    global inv_pts, inv_delay, inv_active, inv_timer
+    global inv_pts,inv_delay,inv_active,inv_timer
     pts_remove = []
-    
-    if inv_delay > 0:
-        inv_delay -= 1
-        if inv_delay == 0 and len(inv_pts) == 0:
+    if inv_delay>0:
+        inv_delay-=1
+        if inv_delay==0 and len(inv_pts)==0:
             spawn_inv_pt()
-    
-    for i, pt in enumerate(inv_pts):
-        dist = math.sqrt((pt[0] - p_pos[0])**2 + (pt[1] - p_pos[1])**2)
-        if dist < inv_rad:
-            inv_active = True
-            inv_timer = inv_duration
+    for i,pt in enumerate(inv_pts):
+        dist=math.sqrt((pt[0]-p_pos[0])**2+(pt[1]-p_pos[1])**2)
+        if dist<inv_rad:
+            inv_active=True
+            inv_timer=inv_duration
             pts_remove.append(i)
-    
-    for i in sorted(pts_remove, reverse=True):
+    for i in sorted(pts_remove,reverse=True):
         inv_pts.pop(i)
-        inv_delay = inv_delay_time
-    
+        inv_delay=inv_delay_time
     if inv_active:
-        inv_timer -= 1
-        if inv_timer <= 0:
-            inv_active = False
-            inv_timer = 0
+        inv_timer-=1
+        if inv_timer<=0:
+            inv_active=False
+            inv_timer=0
 # SHAKIB
-
 def check_oheat():
-    global fire_times, oheat, oheat_timer
-    if len(fire_times) >= 5:
-        time_diff = water_time - fire_times[0]
-        if time_diff <= oheat_threshold:
-            oheat = True
-            oheat_timer = oheat_duration
+    global fire_times,oheat,oheat_timer
+    if len(fire_times)>=5:
+        time_diff=water_time-fire_times[0]
+        if time_diff<=oheat_threshold:
+            oheat=True
+            oheat_timer=oheat_duration
             fire_times.clear()
-
 def update_oheat():
-    global oheat, oheat_timer, fire_times
+    global oheat,oheat_timer,fire_times
     # SHAKIB
     if cheat_mode:
-        oheat = False
-        oheat_timer = 0
-        fire_times = []
+        oheat=False
+        oheat_timer=0
+        fire_times=[]
         return
     # SHAKIB
     if oheat:
-        oheat_timer -= 1
-        if oheat_timer <= 0:
-            oheat = False
-            oheat_timer = 0
-    
-    curr = water_time
-    fire_times = [t for t in fire_times if curr - t <= oheat_threshold]
-
+        oheat_timer-=1
+        if oheat_timer<=0:
+            oheat=False
+            oheat_timer=0
+    curr=water_time
+    fire_times=[t for t in fire_times if curr-t <=oheat_threshold]
 def draw_oheat_indicator():
     if not oheat:
         return
-    
-    remain = oheat_timer / float(oheat_duration)
-    pulse = 0.3 * math.sin(water_time * 0.2)
+    remain=oheat_timer/float(oheat_duration)
+    pulse=0.3*math.sin(water_time*0.2)
     
     glColor3f(1.0, 0.0 + pulse, 0.0)
     draw_text(400, 500, "OVERHEATED!", GLUT_BITMAP_TIMES_ROMAN_24)
